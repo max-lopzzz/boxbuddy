@@ -11,13 +11,25 @@ import type { Item } from "../../lib/types";
 export default function DashboardPage() {
   const [items, setItems] = useState<Item[] | null>(null);
   const [search, setSearch] = useState("");
+  const [fetchError, setFetchError] = useState<string | null>(null);
 
   const fetchItems = useCallback(async (query: string) => {
     setItems(null);
+    setFetchError(null);
     const url = query ? `/api/items?search=${encodeURIComponent(query)}` : "/api/items";
-    const res = await fetch(url);
-    const body = await res.json();
-    setItems(body.items ?? []);
+    try {
+      const res = await fetch(url);
+      if (!res.ok) {
+        setFetchError("Couldn't load your inventory. Please try again.");
+        setItems([]);
+        return;
+      }
+      const body = await res.json();
+      setItems(body.items ?? []);
+    } catch {
+      setFetchError("Couldn't load your inventory. Please try again.");
+      setItems([]);
+    }
   }, []);
 
   useEffect(() => {
@@ -29,6 +41,10 @@ export default function DashboardPage() {
 
   return (
     <main className="mx-auto flex max-w-lg flex-col gap-4 p-4 pb-24">
+      {fetchError && (
+        <p className="rounded-lg bg-red-50 p-3 text-center text-sm text-red-600">{fetchError}</p>
+      )}
+
       <div className="grid grid-cols-3 gap-2">
         <SummaryCard label="Items" value={items?.length ?? "…"} />
         <SummaryCard label="Cost value" value={`$${totalCostValue.toFixed(2)}`} />
