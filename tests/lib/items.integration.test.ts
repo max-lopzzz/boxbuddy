@@ -52,6 +52,11 @@ describe.skipIf(!hasEnv)("items DB layer (integration)", () => {
     expect(items.some((i) => i.id === createdId)).toBe(true);
   });
 
+  it("handles search terms containing commas and parentheses without erroring", async () => {
+    const items = await listItems("nonexistent,(term)");
+    expect(Array.isArray(items)).toBe(true);
+  });
+
   it("rejects creating a second item with a duplicate qr_code", async () => {
     const existing = await getItem(createdId);
     await expect(

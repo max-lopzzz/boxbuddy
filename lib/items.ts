@@ -3,11 +3,16 @@ import { getSupabaseClient } from "./supabase";
 import { generateUniqueCode } from "./qr";
 import type { Item, ItemInput } from "./types";
 
+function escapeForOrFilter(value: string): string {
+  return value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+}
+
 export async function listItems(search?: string): Promise<Item[]> {
   const supabase = getSupabaseClient();
   let query = supabase.from("items").select("*").order("updated_at", { ascending: false });
   if (search) {
-    query = query.or(`name.ilike.%${search}%,sku.ilike.%${search}%`);
+    const escaped = escapeForOrFilter(search);
+    query = query.or(`name.ilike."%${escaped}%",sku.ilike."%${escaped}%"`);
   }
   const { data, error } = await query;
   if (error) throw error;
