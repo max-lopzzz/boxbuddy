@@ -1,5 +1,5 @@
 import crypto from "node:crypto";
-import bwipjs from "bwip-js";
+import bwipjs from "bwip-js/node";
 
 const CODE_PREFIX = "bb_";
 const CODE_LENGTH = 8;
