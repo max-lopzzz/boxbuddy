@@ -1,15 +1,10 @@
 // lib/auth.ts
-import { cookies } from "next/headers";
-import { SESSION_COOKIE_NAME, verifySessionToken } from "./session";
-import { getSessionKeyMaterial } from "./passcode";
+import "server-only";
+import { createSupabaseServerClient } from "./supabase/server";
 
-export async function hasValidSession(): Promise<boolean> {
-  const token = cookies().get(SESSION_COOKIE_NAME)?.value;
-  if (!token) return false;
-  try {
-    const keyMaterial = await getSessionKeyMaterial();
-    return verifySessionToken(token, keyMaterial);
-  } catch {
-    return false;
-  }
+export async function getCurrentUserId(): Promise<string | null> {
+  const supabase = createSupabaseServerClient();
+  const { data, error } = await supabase.auth.getUser();
+  if (error || !data.user) return null;
+  return data.user.id;
 }
