@@ -4,6 +4,8 @@ Small-business inventory tracker with QR code generation/scanning, cost/price/ma
 tracking, and low-stock alerts. See `docs/superpowers/specs/2026-08-04-inventory-tracker-design.md`
 for the full design.
 
+**Live app:** https://boxbuddy-nine.vercel.app/login
+
 ## Local development
 
 1. Copy `.env.example` to `.env.local` and fill in:
@@ -29,4 +31,4 @@ Deployed on Vercel, connected to this repository. `npm run build` also regenerat
 icons (`npm run generate-icons`) before building. Environment variables are set in the
 Vercel project settings — the same four variables listed in `.env.example`
 (`SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `APP_PASSCODE`, `SESSION_SECRET`). Every push
-to `main` auto-deploys.
+to `master` auto-deploys.
