@@ -4,6 +4,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Item, ItemInput } from "../lib/types";
+import { apiFetch } from "../lib/api-client";
 import { AutocompleteInput } from "./AutocompleteInput";
 
 type ItemFormValues = {
@@ -77,7 +78,7 @@ export function ItemForm({ item, prefillCode }: { item?: Item; prefillCode?: str
 
     const url = savedItemState ? `/api/items/${savedItemState.id}` : "/api/items";
     const method = savedItemState ? "PATCH" : "POST";
-    const res = await fetch(url, {
+    const res = await apiFetch(url, {
       method,
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -97,7 +98,7 @@ export function ItemForm({ item, prefillCode }: { item?: Item; prefillCode?: str
     if (photoFile) {
       const formData = new FormData();
       formData.append("photo", photoFile);
-      const photoRes = await fetch(`/api/items/${savedItem.id}/photo`, {
+      const photoRes = await apiFetch(`/api/items/${savedItem.id}/photo`, {
         method: "POST",
         body: formData,
       });
@@ -110,6 +111,7 @@ export function ItemForm({ item, prefillCode }: { item?: Item; prefillCode?: str
     }
 
     setSubmitting(false);
+    router.refresh();
     router.push(`/items/${savedItem.id}`);
   }
 

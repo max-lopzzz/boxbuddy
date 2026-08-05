@@ -6,6 +6,7 @@ import { ItemCard } from "../../components/ItemCard";
 import { SearchBar } from "../../components/SearchBar";
 import { EmptyState } from "../../components/EmptyState";
 import { isLowStock } from "../../lib/item-helpers";
+import { apiFetch } from "../../lib/api-client";
 import type { Item } from "../../lib/types";
 
 export default function DashboardPage() {
@@ -18,7 +19,7 @@ export default function DashboardPage() {
     setFetchError(null);
     const url = query ? `/api/items?search=${encodeURIComponent(query)}` : "/api/items";
     try {
-      const res = await fetch(url);
+      const res = await apiFetch(url);
       if (!res.ok) {
         setFetchError("Couldn't load your inventory. Please try again.");
         setItems([]);
