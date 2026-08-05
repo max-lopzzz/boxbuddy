@@ -19,13 +19,20 @@ export function parseItemInput(body: unknown): ItemInput {
     throw new InvalidItemInputError("name is required and must be a non-empty string");
   }
 
-  const quantity = b.quantity === undefined ? 0 : Number(b.quantity);
+  const rawQuantity = b.quantity === undefined ? 0 : b.quantity;
+  if (typeof rawQuantity !== "number" && typeof rawQuantity !== "string") {
+    throw new InvalidItemInputError("quantity must be a number");
+  }
+  const quantity = Number(rawQuantity);
   if (!Number.isFinite(quantity)) {
     throw new InvalidItemInputError("quantity must be a number");
   }
 
   const parseOptionalNumber = (value: unknown, field: string): number | null => {
     if (value === undefined || value === null || value === "") return null;
+    if (typeof value !== "number" && typeof value !== "string") {
+      throw new InvalidItemInputError(`${field} must be a number or null`);
+    }
     const n = Number(value);
     if (!Number.isFinite(n)) throw new InvalidItemInputError(`${field} must be a number or null`);
     return n;
