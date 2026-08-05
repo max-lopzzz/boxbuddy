@@ -39,6 +39,7 @@ export function ItemForm({ item, prefillCode }: { item?: Item; prefillCode?: str
   const [photoError, setPhotoError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [savedItemState, setSavedItemState] = useState<Item | undefined>(item);
   const router = useRouter();
 
   function update<K extends keyof ItemFormValues>(key: K, value: ItemFormValues[K]) {
@@ -74,8 +75,8 @@ export function ItemForm({ item, prefillCode }: { item?: Item; prefillCode?: str
       ...(prefillCode ? { qr_code: prefillCode } : {}),
     };
 
-    const url = item ? `/api/items/${item.id}` : "/api/items";
-    const method = item ? "PATCH" : "POST";
+    const url = savedItemState ? `/api/items/${savedItemState.id}` : "/api/items";
+    const method = savedItemState ? "PATCH" : "POST";
     const res = await fetch(url, {
       method,
       headers: { "Content-Type": "application/json" },
@@ -91,11 +92,21 @@ export function ItemForm({ item, prefillCode }: { item?: Item; prefillCode?: str
 
     const body = await res.json();
     const savedItem = body.item as Item;
+    setSavedItemState(savedItem);
 
     if (photoFile) {
       const formData = new FormData();
       formData.append("photo", photoFile);
-      await fetch(`/api/items/${savedItem.id}/photo`, { method: "POST", body: formData });
+      const photoRes = await fetch(`/api/items/${savedItem.id}/photo`, {
+        method: "POST",
+        body: formData,
+      });
+      if (!photoRes.ok) {
+        const photoBody = await photoRes.json().catch(() => ({}));
+        setError(photoBody.error ?? "The item saved, but the photo upload failed. You can try again below.");
+        setSubmitting(false);
+        return;
+      }
     }
 
     setSubmitting(false);
@@ -203,7 +214,7 @@ export function ItemForm({ item, prefillCode }: { item?: Item; prefillCode?: str
         disabled={submitting}
         className="rounded-lg bg-orange-400 p-3 font-medium text-white disabled:opacity-50"
       >
-        {submitting ? "Saving…" : item ? "Save changes" : "Add item"}
+        {submitting ? "Saving…" : savedItemState ? "Save changes" : "Add item"}
       </button>
     </form>
   );
