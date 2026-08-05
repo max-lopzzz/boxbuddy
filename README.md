@@ -63,3 +63,11 @@ icons (`npm run generate-icons`) before building. Environment variables are set 
 Vercel project settings — the same four Supabase variables listed in `.env.example`
 (`SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `NEXT_PUBLIC_SUPABASE_URL`,
 `NEXT_PUBLIC_SUPABASE_ANON_KEY`). Every push to `master` auto-deploys.
+
+**Gotcha:** `NEXT_PUBLIC_*` variables are inlined into the client bundle at **build time**,
+not read at runtime. If you change `NEXT_PUBLIC_SUPABASE_URL` or
+`NEXT_PUBLIC_SUPABASE_ANON_KEY` in the Vercel project settings, updating the env var alone
+does nothing — you must trigger a new deployment (e.g. an empty commit/push, or "Redeploy"
+in the Vercel dashboard) for the new value to actually reach the browser. The two
+server-only variables (`SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`) don't have this
+limitation since they're read at request time.
