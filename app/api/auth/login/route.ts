@@ -5,7 +5,7 @@ import { verifyPasscode, getSessionKeyMaterial } from "../../../../lib/passcode"
 import { isRateLimited, recordLoginAttempt } from "../../../../lib/rate-limit";
 
 export async function POST(request: NextRequest) {
-  const ip = request.headers.get("x-forwarded-for") ?? "unknown";
+  const ip = request.ip ?? request.headers.get("x-real-ip") ?? "unknown";
 
   if (await isRateLimited(ip)) {
     return NextResponse.json(

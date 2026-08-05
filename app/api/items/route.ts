@@ -1,7 +1,7 @@
 // app/api/items/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { hasValidSession } from "../../../lib/auth";
-import { listItems, createItem } from "../../../lib/items";
+import { listItems, createItem, parseItemInput, InvalidItemInputError } from "../../../lib/items";
 
 export async function GET(request: NextRequest) {
   if (!(await hasValidSession())) {
@@ -16,9 +16,17 @@ export async function POST(request: NextRequest) {
   if (!(await hasValidSession())) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  const body = await request.json();
+  let input;
   try {
-    const item = await createItem(body);
+    input = parseItemInput(await request.json());
+  } catch (error: any) {
+    if (error instanceof InvalidItemInputError) {
+      return NextResponse.json({ error: error.message }, { status: 400 });
+    }
+    throw error;
+  }
+  try {
+    const item = await createItem(input);
     return NextResponse.json({ item }, { status: 201 });
   } catch (error: any) {
     if (error?.code === "23505") {
