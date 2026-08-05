@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { createSessionToken, SESSION_COOKIE_NAME, SESSION_MAX_AGE_SECONDS } from "../../../../lib/session";
-import { verifyPasscode } from "../../../../lib/passcode";
+import { verifyPasscode, getSessionKeyMaterial } from "../../../../lib/passcode";
 import { isRateLimited, recordLoginAttempt } from "../../../../lib/rate-limit";
 
 export async function POST(request: NextRequest) {
@@ -21,7 +21,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Incorrect passcode" }, { status: 401 });
   }
 
-  const token = createSessionToken();
+  const keyMaterial = await getSessionKeyMaterial();
+  const token = createSessionToken(keyMaterial);
   cookies().set(SESSION_COOKIE_NAME, token, {
     httpOnly: true,
     secure: true,

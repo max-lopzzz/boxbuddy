@@ -4,7 +4,7 @@ import { hasValidSession } from "../../../lib/auth";
 import { listItems, createItem } from "../../../lib/items";
 
 export async function GET(request: NextRequest) {
-  if (!hasValidSession()) {
+  if (!(await hasValidSession())) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   const search = request.nextUrl.searchParams.get("search") ?? undefined;
@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  if (!hasValidSession()) {
+  if (!(await hasValidSession())) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   const body = await request.json();

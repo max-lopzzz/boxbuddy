@@ -4,7 +4,7 @@ import { hasValidSession } from "../../../../lib/auth";
 import { lookupByCode } from "../../../../lib/items";
 
 export async function GET(request: NextRequest) {
-  if (!hasValidSession()) {
+  if (!(await hasValidSession())) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   const code = request.nextUrl.searchParams.get("code");

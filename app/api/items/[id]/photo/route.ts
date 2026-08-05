@@ -7,7 +7,7 @@ import { getItem, updateItem } from "../../../../../lib/items";
 const MAX_SIZE_BYTES = 5 * 1024 * 1024;
 
 export async function GET(_request: NextRequest, { params }: { params: { id: string } }) {
-  if (!hasValidSession()) {
+  if (!(await hasValidSession())) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   const item = await getItem(params.id);
@@ -19,7 +19,7 @@ export async function GET(_request: NextRequest, { params }: { params: { id: str
 }
 
 export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
-  if (!hasValidSession()) {
+  if (!(await hasValidSession())) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   const formData = await request.formData();
