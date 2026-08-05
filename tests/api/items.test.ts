@@ -280,6 +280,31 @@ describe.skipIf(!hasEnv)("items API routes (integration)", () => {
     expect(verifyBody.item.id).toBe(id);
   });
 
+  it("a different account cannot upload a photo to this item", async () => {
+    const id = createdIds[0];
+    const formData = new FormData();
+    // The route's ownership check (getItem(userId, params.id)) runs before the
+    // multipart body is parsed at all, so the file's byte content is irrelevant
+    // here — the request should be rejected before any image processing.
+    const imageBlob = new Blob([Buffer.from([0x89, 0x50, 0x4e, 0x47])], { type: "image/png" });
+    formData.append("photo", imageBlob, "test.png");
+
+    const res = await fetch(`${baseUrl}/api/items/${id}/photo`, {
+      method: "POST",
+      headers: { Cookie: otherSessionCookie },
+      body: formData,
+    });
+    expect(res.status).toBe(404);
+  });
+
+  it("a different account cannot fetch this item's photo", async () => {
+    const id = createdIds[0];
+    const res = await fetch(`${baseUrl}/api/items/${id}/photo`, {
+      headers: { Cookie: otherSessionCookie },
+    });
+    expect(res.status).toBe(404);
+  });
+
   it("returns 404 when updating a nonexistent item", async () => {
     const res = await fetch(`${baseUrl}/api/items/00000000-0000-0000-0000-000000000000`, {
       method: "PATCH",
