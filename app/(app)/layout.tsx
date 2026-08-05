@@ -1,9 +1,10 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { hasValidSession } from "../../lib/auth";
+import { getCurrentUserId } from "../../lib/auth";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
-  if (!(await hasValidSession())) {
+  const userId = await getCurrentUserId();
+  if (!userId) {
     redirect("/login");
   }
   return (
