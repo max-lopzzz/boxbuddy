@@ -2,9 +2,14 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { spawn, ChildProcess } from "node:child_process";
 import net from "node:net";
+import { createServerClient } from "@supabase/ssr";
+import { getSupabaseClient } from "../../lib/supabase";
 
 const hasEnv = Boolean(
-  process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY && process.env.APP_PASSCODE
+  process.env.SUPABASE_URL &&
+    process.env.SUPABASE_SERVICE_ROLE_KEY &&
+    process.env.NEXT_PUBLIC_SUPABASE_URL &&
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 );
 
 function getFreePort(): Promise<number> {
@@ -28,8 +33,6 @@ async function waitForServer(baseUrl: string, timeoutMs: number): Promise<void> 
   while (Date.now() < deadline) {
     try {
       const res = await fetch(`${baseUrl}/login`);
-      // Next dev returns a normal 200 once the page has compiled. Treat any
-      // non-5xx response as "server is up" (a compiling page can 404 briefly).
       if (res.status < 500) return;
     } catch {
       // server not up yet
@@ -39,36 +42,81 @@ async function waitForServer(baseUrl: string, timeoutMs: number): Promise<void> 
   throw new Error(`Server did not become ready within ${timeoutMs}ms`);
 }
 
+// Creates a real Supabase Auth session for the given credentials and returns a
+// `Cookie:` header string usable against our own Next.js server — without needing
+// a real browser. Uses the same @supabase/ssr package the app itself uses, with a
+// cookie adapter that just captures what would be set instead of writing anywhere.
+async function loginAndGetCookieHeader(email: string, password: string): Promise<string> {
+  const capturedCookies: string[] = [];
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return [];
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value }) => {
+            capturedCookies.push(`${name}=${value}`);
+          });
+        },
+      },
+    }
+  );
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  if (error) throw error;
+  return capturedCookies.join("; ");
+}
+
 describe.skipIf(!hasEnv)("items API routes (integration)", () => {
   let serverProcess: ChildProcess;
   let baseUrl: string;
   let sessionCookie: string;
+  let otherSessionCookie: string;
+  let testUserId: string;
+  let otherTestUserId: string;
   const createdIds: string[] = [];
 
+  const testEmail = `test-items-api-${Date.now()}@example.com`;
+  const testPassword = "test-password-not-real-12345";
+  const otherTestEmail = `test-items-api-other-${Date.now()}@example.com`;
+
   beforeAll(async () => {
+    const admin = getSupabaseClient();
+
+    const { data: user, error: userError } = await admin.auth.admin.createUser({
+      email: testEmail,
+      password: testPassword,
+      email_confirm: true,
+    });
+    if (userError || !user.user) throw userError ?? new Error("Failed to create test user");
+    testUserId = user.user.id;
+
+    const { data: otherUser, error: otherUserError } = await admin.auth.admin.createUser({
+      email: otherTestEmail,
+      password: testPassword,
+      email_confirm: true,
+    });
+    if (otherUserError || !otherUser.user) {
+      throw otherUserError ?? new Error("Failed to create second test user");
+    }
+    otherTestUserId = otherUser.user.id;
+
     const port = await getFreePort();
     baseUrl = `http://localhost:${port}`;
     serverProcess = spawn("node_modules/.bin/next", ["dev", "-p", String(port)], {
       cwd: process.cwd(),
       stdio: "pipe",
-      detached: true, // own process group, so we can kill Next's spawned workers too
+      detached: true,
     });
     await waitForServer(baseUrl, 60_000);
 
-    const loginRes = await fetch(`${baseUrl}/api/auth/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ passcode: process.env.APP_PASSCODE }),
-    });
-    expect(loginRes.status).toBe(200);
-    const setCookie = loginRes.headers.get("set-cookie") ?? "";
-    const match = setCookie.match(/bb_session=([^;]+)/);
-    if (!match) throw new Error("Login did not return a session cookie");
-    sessionCookie = `bb_session=${match[1]}`;
+    sessionCookie = await loginAndGetCookieHeader(testEmail, testPassword);
+    otherSessionCookie = await loginAndGetCookieHeader(otherTestEmail, testPassword);
   }, 90_000);
 
   afterAll(async () => {
-    // Clean up any items this suite created, even if a test failed partway through.
     for (const id of createdIds) {
       await fetch(`${baseUrl}/api/items/${id}`, {
         method: "DELETE",
@@ -76,15 +124,15 @@ describe.skipIf(!hasEnv)("items API routes (integration)", () => {
       }).catch(() => {});
     }
     if (serverProcess && serverProcess.pid) {
-      // `next dev` spawns its own child processes (webpack workers, etc.).
-      // Killing just the parent PID can leave those orphaned, so kill the
-      // whole process group we detached it into above.
       try {
         process.kill(-serverProcess.pid, "SIGTERM");
       } catch {
         serverProcess.kill("SIGTERM");
       }
     }
+    const admin = getSupabaseClient();
+    if (testUserId) await admin.auth.admin.deleteUser(testUserId).catch(() => {});
+    if (otherTestUserId) await admin.auth.admin.deleteUser(otherTestUserId).catch(() => {});
   });
 
   it("rejects unauthenticated requests to the items collection", async () => {
@@ -144,6 +192,23 @@ describe.skipIf(!hasEnv)("items API routes (integration)", () => {
     expect(body.item.id).toBe(id);
   });
 
+  it("a different account cannot see this item", async () => {
+    const id = createdIds[0];
+    const res = await fetch(`${baseUrl}/api/items/${id}`, {
+      headers: { Cookie: otherSessionCookie },
+    });
+    expect(res.status).toBe(404);
+  });
+
+  it("a different account's item list does not include this item", async () => {
+    const res = await fetch(`${baseUrl}/api/items?search=API%20Test%20Widget`, {
+      headers: { Cookie: otherSessionCookie },
+    });
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.items.some((i: any) => i.id === createdIds[0])).toBe(false);
+  });
+
   it("updates the item", async () => {
     const id = createdIds[0];
     const res = await fetch(`${baseUrl}/api/items/${id}`, {
@@ -166,6 +231,26 @@ describe.skipIf(!hasEnv)("items API routes (integration)", () => {
     expect(body.item.quantity).toBe(3);
   });
 
+  it("a different account cannot update this item", async () => {
+    const id = createdIds[0];
+    const res = await fetch(`${baseUrl}/api/items/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json", Cookie: otherSessionCookie },
+      body: JSON.stringify({
+        name: "Hijacked",
+        sku: null,
+        quantity: 1,
+        reorder_at: null,
+        location: null,
+        category: null,
+        notes: null,
+        cost: null,
+        price: null,
+      }),
+    });
+    expect(res.status).toBe(404);
+  });
+
   it("returns 404 when updating a nonexistent item", async () => {
     const res = await fetch(`${baseUrl}/api/items/00000000-0000-0000-0000-000000000000`, {
       method: "PATCH",
@@ -185,7 +270,7 @@ describe.skipIf(!hasEnv)("items API routes (integration)", () => {
     expect(res.status).toBe(404);
   });
 
-  it("returns 409 when creating a duplicate qr_code", async () => {
+  it("returns 409 when creating a duplicate qr_code for the same account", async () => {
     const existing = await fetch(`${baseUrl}/api/items/${createdIds[0]}`, {
       headers: { Cookie: sessionCookie },
     }).then((r) => r.json());
@@ -207,6 +292,37 @@ describe.skipIf(!hasEnv)("items API routes (integration)", () => {
       }),
     });
     expect(res.status).toBe(409);
+  });
+
+  it("a different account CAN use the same qr_code without conflict", async () => {
+    const existing = await fetch(`${baseUrl}/api/items/${createdIds[0]}`, {
+      headers: { Cookie: sessionCookie },
+    }).then((r) => r.json());
+
+    const res = await fetch(`${baseUrl}/api/items`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Cookie: otherSessionCookie },
+      body: JSON.stringify({
+        name: "Other Account's Item",
+        sku: null,
+        quantity: 1,
+        reorder_at: null,
+        location: null,
+        category: null,
+        notes: null,
+        cost: null,
+        price: null,
+        qr_code: existing.item.qr_code,
+      }),
+    });
+    expect(res.status).toBe(201);
+    const body = await res.json();
+    // Clean up immediately since this item belongs to the second account, not
+    // the one `afterAll`'s createdIds loop cleans up.
+    await fetch(`${baseUrl}/api/items/${body.item.id}`, {
+      method: "DELETE",
+      headers: { Cookie: otherSessionCookie },
+    });
   });
 
   it("looks up the item by its qr_code", async () => {
@@ -241,6 +357,15 @@ describe.skipIf(!hasEnv)("items API routes (integration)", () => {
     expect(body.values).toContain("Test Shelf");
   });
 
+  it("a different account's autocomplete does not see this location", async () => {
+    const res = await fetch(`${baseUrl}/api/items/autocomplete?field=location&q=Test`, {
+      headers: { Cookie: otherSessionCookie },
+    });
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.values).not.toContain("Test Shelf");
+  });
+
   it("rejects an invalid autocomplete field", async () => {
     const res = await fetch(`${baseUrl}/api/items/autocomplete?field=bogus&q=Test`, {
       headers: { Cookie: sessionCookie },
@@ -261,7 +386,6 @@ describe.skipIf(!hasEnv)("items API routes (integration)", () => {
     });
     expect(getRes.status).toBe(404);
 
-    // Already deleted — don't try to clean it up again in afterAll.
     createdIds.length = 0;
   }, 20_000);
 });
