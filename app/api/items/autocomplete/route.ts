@@ -1,10 +1,11 @@
 // app/api/items/autocomplete/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { hasValidSession } from "../../../../lib/auth";
+import { getCurrentUserId } from "../../../../lib/auth";
 import { autocompleteValues } from "../../../../lib/items";
 
 export async function GET(request: NextRequest) {
-  if (!(await hasValidSession())) {
+  const userId = await getCurrentUserId();
+  if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   const field = request.nextUrl.searchParams.get("field");
@@ -12,6 +13,6 @@ export async function GET(request: NextRequest) {
   if (field !== "location" && field !== "category") {
     return NextResponse.json({ error: "Invalid field" }, { status: 400 });
   }
-  const values = await autocompleteValues(field, search);
+  const values = await autocompleteValues(userId, field, search);
   return NextResponse.json({ values });
 }

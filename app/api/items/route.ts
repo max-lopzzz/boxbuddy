@@ -1,19 +1,21 @@
 // app/api/items/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { hasValidSession } from "../../../lib/auth";
+import { getCurrentUserId } from "../../../lib/auth";
 import { listItems, createItem, parseItemInput, InvalidItemInputError } from "../../../lib/items";
 
 export async function GET(request: NextRequest) {
-  if (!(await hasValidSession())) {
+  const userId = await getCurrentUserId();
+  if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   const search = request.nextUrl.searchParams.get("search") ?? undefined;
-  const items = await listItems(search);
+  const items = await listItems(userId, search);
   return NextResponse.json({ items });
 }
 
 export async function POST(request: NextRequest) {
-  if (!(await hasValidSession())) {
+  const userId = await getCurrentUserId();
+  if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   let input;
@@ -26,7 +28,7 @@ export async function POST(request: NextRequest) {
     throw error;
   }
   try {
-    const item = await createItem(input);
+    const item = await createItem(userId, input);
     return NextResponse.json({ item }, { status: 201 });
   } catch (error: any) {
     if (error?.code === "23505") {

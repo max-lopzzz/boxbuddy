@@ -1,6 +1,6 @@
 // app/api/items/[id]/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { hasValidSession } from "../../../../lib/auth";
+import { getCurrentUserId } from "../../../../lib/auth";
 import {
   getItem,
   updateItem,
@@ -10,10 +10,11 @@ import {
 } from "../../../../lib/items";
 
 export async function GET(_request: NextRequest, { params }: { params: { id: string } }) {
-  if (!(await hasValidSession())) {
+  const userId = await getCurrentUserId();
+  if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  const item = await getItem(params.id);
+  const item = await getItem(userId, params.id);
   if (!item) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
@@ -21,7 +22,8 @@ export async function GET(_request: NextRequest, { params }: { params: { id: str
 }
 
 export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
-  if (!(await hasValidSession())) {
+  const userId = await getCurrentUserId();
+  if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   let input;
@@ -34,7 +36,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
     throw error;
   }
   try {
-    const item = await updateItem(params.id, input);
+    const item = await updateItem(userId, params.id, input);
     return NextResponse.json({ item });
   } catch (error: any) {
     if (error?.code === "PGRST116") {
@@ -51,9 +53,10 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
 }
 
 export async function DELETE(_request: NextRequest, { params }: { params: { id: string } }) {
-  if (!(await hasValidSession())) {
+  const userId = await getCurrentUserId();
+  if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  await deleteItem(params.id);
+  await deleteItem(userId, params.id);
   return NextResponse.json({ ok: true });
 }
