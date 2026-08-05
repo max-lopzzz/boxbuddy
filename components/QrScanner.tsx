@@ -18,6 +18,8 @@ export function QrScanner({
   useEffect(() => {
     const scanner = new Html5Qrcode(SCANNER_ELEMENT_ID);
     scannerRef.current = scanner;
+    let cancelled = false;
+    let started = false;
 
     scanner
       .start(
@@ -30,12 +32,22 @@ export function QrScanner({
           // decode-attempt errors fire continuously while scanning; ignore them
         }
       )
+      .then(() => {
+        started = true;
+        if (cancelled) {
+          // Unmounted while start() was still pending — stop it now that it's actually running.
+          scanner.stop().catch(() => {});
+        }
+      })
       .catch(() => {
         onCameraError();
       });
 
     return () => {
-      scanner.stop().catch(() => {});
+      cancelled = true;
+      if (started) {
+        scanner.stop().catch(() => {});
+      }
     };
   }, [onScan, onCameraError]);
 
