@@ -2,15 +2,23 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { createSupabaseBrowserClient } from "../../lib/supabase/browser";
 
+const URL_ERROR_MESSAGES: Record<string, string> = {
+  "invalid-or-expired-link": "That link is invalid or has expired. Please request a new one.",
+};
+
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  const searchParams = useSearchParams();
+  const urlError = searchParams.get("error");
+  const [error, setError] = useState<string | null>(
+    urlError ? URL_ERROR_MESSAGES[urlError] ?? null : null
+  );
   const [submitting, setSubmitting] = useState(false);
   const router = useRouter();
 
