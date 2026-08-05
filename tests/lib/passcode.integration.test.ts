@@ -1,13 +1,33 @@
-import { describe, it, expect, afterAll } from "vitest";
+import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { getSupabaseClient } from "../../lib/supabase";
 import { verifyPasscode, setPasscode, getSessionKeyMaterial } from "../../lib/passcode";
 
-const hasEnv = Boolean(process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY);
+const hasEnv = Boolean(
+  process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY && process.env.APP_PASSCODE
+);
 
 describe.skipIf(!hasEnv)("passcode storage (integration)", () => {
+  let originalRow: { passcode_hash: string; passcode_salt: string } | null = null;
+
+  beforeAll(async () => {
+    const supabase = getSupabaseClient();
+    const { data } = await supabase
+      .from("app_settings")
+      .select("passcode_hash, passcode_salt")
+      .eq("id", 1)
+      .maybeSingle();
+    originalRow = data;
+  });
+
   afterAll(async () => {
-    // Restore the original .env.local APP_PASSCODE so login keeps working after this test run.
-    if (process.env.APP_PASSCODE) {
+    const supabase = getSupabaseClient();
+    if (originalRow) {
+      // Restore the exact pre-test row, byte-for-byte, regardless of what any test changed it to.
+      await supabase
+        .from("app_settings")
+        .upsert({ id: 1, passcode_hash: originalRow.passcode_hash, passcode_salt: originalRow.passcode_salt });
+    } else if (process.env.APP_PASSCODE) {
+      // No row existed before this run (fresh project) — seed it from APP_PASSCODE as a fallback.
       await setPasscode(process.env.APP_PASSCODE);
     }
   });
@@ -34,6 +54,6 @@ describe.skipIf(!hasEnv)("passcode storage (integration)", () => {
     const keyMaterialAfter = await getSessionKeyMaterial();
 
     expect(keyMaterialAfter).not.toBe(keyMaterialBefore);
-    // afterAll below restores APP_PASSCODE so subsequent logins keep working.
+    // afterAll above restores the original DB row so subsequent logins keep working.
   });
 });
