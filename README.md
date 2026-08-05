@@ -30,12 +30,12 @@ inventory — no user can see, edit, or delete another account's items.
      migration in `docs/superpowers/plans/2026-08-05-multi-user-accounts.md` (Task 2, Step 2)
      instead — it adds `owner_id`, drops the old global `qr_code` uniqueness constraint in
      favor of a per-owner one, deletes any pre-existing test data that has no owner, and
-     enables row level security on `items` (run `alter table items enable row level
-     security;` if the table predates this and doesn't have it yet).
+     enables row level security on `items` (running `alter table items enable row level
+     security;` is safe either way — it's a no-op if already enabled).
    - **Either path — verify RLS is actually blocking direct access:** once you have your
      anon key (step 1), confirm the anon key alone cannot read inventory data:
      ```bash
-     curl "$SUPABASE_URL/rest/v1/items?select=id" -H "apikey: $ANON_KEY"
+     curl "$SUPABASE_URL/rest/v1/items?select=id" -H "apikey: $NEXT_PUBLIC_SUPABASE_ANON_KEY"
      ```
      Expected response: `[]` — an empty array, not the actual items. This confirms RLS is
      enabled with no policies (deny-by-default); the app's own API routes, which use the
