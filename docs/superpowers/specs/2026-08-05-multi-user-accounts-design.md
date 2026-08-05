@@ -32,9 +32,10 @@ second spec covers Spanish/English bilingual support and builds on top of this o
 
 - **Authentication**: Supabase Auth (email + password), called directly from the browser
   via a new client-side Supabase client using the public "anon" key (safe to expose — this
-  key alone cannot read or write inventory data, since the `items` table has no policies
-  granting it access; all inventory access still happens through our own server-side API
-  routes using the service-role key, exactly as before).
+  key alone cannot read or write inventory data, since the `items` table has row level
+  security enabled with no policies defined, which denies all direct access by default;
+  all inventory access still happens through our own server-side API routes using the
+  service-role key, which bypasses RLS, exactly as before).
 - **Session freshness**: a new `middleware.ts` refreshes the Supabase Auth session cookie
   on every request (Supabase's standard Next.js integration pattern), using the
   `@supabase/ssr` package.
