@@ -1,33 +1,36 @@
-import { describe, it, expect, beforeAll } from "vitest";
+import { describe, it, expect } from "vitest";
 import { createSessionToken, verifySessionToken } from "../../lib/session";
 
-beforeAll(() => {
-  process.env.SESSION_SECRET = "test-secret-do-not-use-in-prod";
-});
+const KEY_MATERIAL = "test-secret-do-not-use-in-prod";
 
 describe("session token", () => {
   it("creates a token that verifies as valid", () => {
-    const token = createSessionToken();
-    expect(verifySessionToken(token)).toBe(true);
+    const token = createSessionToken(KEY_MATERIAL);
+    expect(verifySessionToken(token, KEY_MATERIAL)).toBe(true);
   });
 
   it("rejects a tampered token", () => {
-    const token = createSessionToken();
+    const token = createSessionToken(KEY_MATERIAL);
     const tampered = token.slice(0, -2) + "xx";
-    expect(verifySessionToken(tampered)).toBe(false);
+    expect(verifySessionToken(tampered, KEY_MATERIAL)).toBe(false);
   });
 
   it("rejects an empty or missing token", () => {
-    expect(verifySessionToken(undefined)).toBe(false);
-    expect(verifySessionToken(null)).toBe(false);
-    expect(verifySessionToken("")).toBe(false);
+    expect(verifySessionToken(undefined, KEY_MATERIAL)).toBe(false);
+    expect(verifySessionToken(null, KEY_MATERIAL)).toBe(false);
+    expect(verifySessionToken("", KEY_MATERIAL)).toBe(false);
   });
 
   it("rejects an expired token", () => {
     const realNow = Date.now;
     Date.now = () => realNow() - 200 * 24 * 60 * 60 * 1000;
-    const oldToken = createSessionToken();
+    const oldToken = createSessionToken(KEY_MATERIAL);
     Date.now = realNow;
-    expect(verifySessionToken(oldToken)).toBe(false);
+    expect(verifySessionToken(oldToken, KEY_MATERIAL)).toBe(false);
+  });
+
+  it("rejects a token verified under a different key material (e.g. after a passcode change)", () => {
+    const token = createSessionToken("key-a");
+    expect(verifySessionToken(token, "key-b")).toBe(false);
   });
 });

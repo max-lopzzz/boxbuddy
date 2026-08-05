@@ -3,7 +3,7 @@ import { hasValidSession } from "../../../../lib/auth";
 import { verifyPasscode, setPasscode } from "../../../../lib/passcode";
 
 export async function POST(request: NextRequest) {
-  if (!hasValidSession()) {
+  if (!(await hasValidSession())) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   const { current, next } = await request.json();

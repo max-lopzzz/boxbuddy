@@ -52,3 +52,18 @@ export async function verifyPasscode(passcode: string): Promise<boolean> {
   if (a.length !== b.length) return false;
   return crypto.timingSafeEqual(a, b);
 }
+
+/**
+ * Returns key material for signing/verifying session tokens, derived from both
+ * SESSION_SECRET and the current passcode_hash. Because the passcode hash is
+ * part of the key, rotating the passcode (via setPasscode) invalidates every
+ * session token that was signed under the old key.
+ */
+export async function getSessionKeyMaterial(): Promise<string> {
+  const secret = process.env.SESSION_SECRET;
+  if (!secret) throw new Error("SESSION_SECRET is not set");
+  await ensurePasscodeInitialized();
+  const stored = await getStoredPasscode();
+  if (!stored) throw new Error("Passcode is not initialized");
+  return `${secret}:${stored.hash}`;
+}
