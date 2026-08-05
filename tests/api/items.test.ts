@@ -249,6 +249,35 @@ describe.skipIf(!hasEnv)("items API routes (integration)", () => {
       }),
     });
     expect(res.status).toBe(404);
+
+    const verifyRes = await fetch(`${baseUrl}/api/items/${id}`, {
+      headers: { Cookie: sessionCookie },
+    });
+    expect(verifyRes.status).toBe(200);
+    const verifyBody = await verifyRes.json();
+    expect(verifyBody.item.name).toBe("API Test Widget");
+    expect(verifyBody.item.quantity).toBe(3);
+  });
+
+  it("a different account's DELETE attempt does not remove this item", async () => {
+    const id = createdIds[0];
+    // The DELETE route does not distinguish "not found" from "not owned" —
+    // deleteItem() scopes its delete to `.eq("owner_id", ownerId)`, so a
+    // cross-account delete simply matches zero rows and the route still
+    // unconditionally responds 200 { ok: true }. The real assertion is that
+    // the item survives, not the status code.
+    const res = await fetch(`${baseUrl}/api/items/${id}`, {
+      method: "DELETE",
+      headers: { Cookie: otherSessionCookie },
+    });
+    expect(res.status).toBe(200);
+
+    const verifyRes = await fetch(`${baseUrl}/api/items/${id}`, {
+      headers: { Cookie: sessionCookie },
+    });
+    expect(verifyRes.status).toBe(200);
+    const verifyBody = await verifyRes.json();
+    expect(verifyBody.item.id).toBe(id);
   });
 
   it("returns 404 when updating a nonexistent item", async () => {
