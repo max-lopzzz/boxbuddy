@@ -1,12 +1,12 @@
-// components/QrScanner.tsx
+// components/BarcodeScanner.tsx
 "use client";
 
 import { useEffect, useRef } from "react";
 import { Html5Qrcode } from "html5-qrcode";
 
-const SCANNER_ELEMENT_ID = "qr-scanner-region";
+const SCANNER_ELEMENT_ID = "barcode-scanner-region";
 
-export function QrScanner({
+export function BarcodeScanner({
   onScan,
   onCameraError,
 }: {

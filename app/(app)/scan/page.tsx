@@ -3,7 +3,7 @@
 
 import { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
-import { QrScanner } from "../../../components/QrScanner";
+import { BarcodeScanner } from "../../../components/BarcodeScanner";
 import { apiFetch } from "../../../lib/api-client";
 
 export default function ScanPage() {
@@ -33,7 +33,7 @@ export default function ScanPage() {
     <main className="mx-auto flex max-w-lg flex-col gap-4 p-4">
       <h1 className="text-xl font-semibold text-stone-800">Scan a code</h1>
 
-      {!cameraFailed && <QrScanner onScan={handleScan} onCameraError={handleCameraError} />}
+      {!cameraFailed && <BarcodeScanner onScan={handleScan} onCameraError={handleCameraError} />}
 
       {cameraFailed && (
         <p className="text-sm text-stone-600">
