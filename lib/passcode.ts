@@ -32,20 +32,21 @@ export async function setPasscode(passcode: string): Promise<void> {
   if (error) throw error;
 }
 
-async function ensurePasscodeInitialized(): Promise<void> {
+async function ensurePasscodeInitialized(): Promise<{ hash: string; salt: string }> {
   const existing = await getStoredPasscode();
-  if (existing) return;
+  if (existing) return existing;
   const initial = process.env.APP_PASSCODE;
   if (!initial) {
     throw new Error("APP_PASSCODE must be set to initialize the passcode for the first time");
   }
   await setPasscode(initial);
+  const created = await getStoredPasscode();
+  if (!created) throw new Error("Failed to initialize passcode");
+  return created;
 }
 
 export async function verifyPasscode(passcode: string): Promise<boolean> {
-  await ensurePasscodeInitialized();
-  const stored = await getStoredPasscode();
-  if (!stored) return false;
+  const stored = await ensurePasscodeInitialized();
   const hash = hashPasscode(passcode, stored.salt);
   const a = Buffer.from(hash);
   const b = Buffer.from(stored.hash);
@@ -62,8 +63,6 @@ export async function verifyPasscode(passcode: string): Promise<boolean> {
 export async function getSessionKeyMaterial(): Promise<string> {
   const secret = process.env.SESSION_SECRET;
   if (!secret) throw new Error("SESSION_SECRET is not set");
-  await ensurePasscodeInitialized();
-  const stored = await getStoredPasscode();
-  if (!stored) throw new Error("Passcode is not initialized");
+  const stored = await ensurePasscodeInitialized();
   return `${secret}:${stored.hash}`;
 }

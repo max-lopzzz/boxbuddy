@@ -1,6 +1,6 @@
 import { describe, it, expect, afterAll } from "vitest";
 import { getSupabaseClient } from "../../lib/supabase";
-import { verifyPasscode, setPasscode } from "../../lib/passcode";
+import { verifyPasscode, setPasscode, getSessionKeyMaterial } from "../../lib/passcode";
 
 const hasEnv = Boolean(process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY);
 
@@ -23,5 +23,17 @@ describe.skipIf(!hasEnv)("passcode storage (integration)", () => {
     await setPasscode("a-new-test-passcode");
     expect(await verifyPasscode("a-new-test-passcode")).toBe(true);
     expect(await verifyPasscode(process.env.APP_PASSCODE!)).toBe(false);
+  });
+
+  it("rotating the passcode changes the session key material, invalidating prior tokens", async () => {
+    // Ensure a known-good starting state regardless of test execution order.
+    await setPasscode(process.env.APP_PASSCODE!);
+    const keyMaterialBefore = await getSessionKeyMaterial();
+
+    await setPasscode("a-different-test-passcode-for-key-material-test");
+    const keyMaterialAfter = await getSessionKeyMaterial();
+
+    expect(keyMaterialAfter).not.toBe(keyMaterialBefore);
+    // afterAll below restores APP_PASSCODE so subsequent logins keep working.
   });
 });
