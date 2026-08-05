@@ -38,6 +38,13 @@ before update on items
 for each row
 execute function set_updated_at();
 
+-- No policies are defined on purpose: the service-role key used by our own API
+-- routes bypasses RLS entirely, so enabling RLS here with zero policies gives
+-- the anon/authenticated Postgres roles exactly zero direct access to inventory
+-- data (the browser can never query `items` directly), while our server-side
+-- API routes continue to work unaffected.
+alter table items enable row level security;
+
 insert into storage.buckets (id, name, public)
 values ('photos', 'photos', false)
 on conflict (id) do nothing;
