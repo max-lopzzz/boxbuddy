@@ -2,6 +2,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { apiFetch } from "../lib/api-client";
 
 export function AutocompleteInput({
   label,
@@ -22,7 +23,7 @@ export function AutocompleteInput({
       return;
     }
     const timeout = setTimeout(async () => {
-      const res = await fetch(`/api/items/autocomplete?field=${field}&q=${encodeURIComponent(value)}`);
+      const res = await apiFetch(`/api/items/autocomplete?field=${field}&q=${encodeURIComponent(value)}`);
       const body = await res.json();
       setSuggestions(body.values ?? []);
     }, 200);

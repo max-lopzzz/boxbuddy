@@ -4,6 +4,7 @@
 import { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
 import { QrScanner } from "../../../components/QrScanner";
+import { apiFetch } from "../../../lib/api-client";
 
 export default function ScanPage() {
   const [manualCode, setManualCode] = useState("");
@@ -13,7 +14,7 @@ export default function ScanPage() {
 
   const handleScan = useCallback(
     async (code: string) => {
-      const res = await fetch(`/api/items/lookup-by-code?code=${encodeURIComponent(code)}`);
+      const res = await apiFetch(`/api/items/lookup-by-code?code=${encodeURIComponent(code)}`);
       const body = await res.json();
       if (body.item) {
         router.push(`/items/${body.item.id}`);
