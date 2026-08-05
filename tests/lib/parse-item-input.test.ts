@@ -60,6 +60,37 @@ describe("parseItemInput", () => {
     expect(result.quantity).toBe(0);
   });
 
+  it("accepts a numeric string for quantity", () => {
+    const result = parseItemInput({ name: "Widget", quantity: "5" });
+    expect(result.quantity).toBe(5);
+  });
+
+  it("throws when quantity is true", () => {
+    expect(() => parseItemInput({ name: "Widget", quantity: true })).toThrow(
+      InvalidItemInputError
+    );
+  });
+
+  it("throws when quantity is false", () => {
+    expect(() => parseItemInput({ name: "Widget", quantity: false })).toThrow(
+      InvalidItemInputError
+    );
+  });
+
+  it("throws when quantity is an empty array", () => {
+    expect(() => parseItemInput({ name: "Widget", quantity: [] })).toThrow(InvalidItemInputError);
+  });
+
+  it("throws when quantity is a single-element array", () => {
+    expect(() => parseItemInput({ name: "Widget", quantity: [5] })).toThrow(
+      InvalidItemInputError
+    );
+  });
+
+  it("throws when quantity is a plain object", () => {
+    expect(() => parseItemInput({ name: "Widget", quantity: {} })).toThrow(InvalidItemInputError);
+  });
+
   describe("optional numeric fields (reorder_at, cost, price)", () => {
     for (const field of ["reorder_at", "cost", "price"] as const) {
       it(`${field}: undefined becomes null`, () => {
@@ -82,8 +113,43 @@ describe("parseItemInput", () => {
         expect(result[field]).toBe(5);
       });
 
+      it(`${field}: valid numeric string passes through`, () => {
+        const result = parseItemInput({ name: "Widget", [field]: "5" });
+        expect(result[field]).toBe(5);
+      });
+
       it(`${field}: non-numeric string throws`, () => {
         expect(() => parseItemInput({ name: "Widget", [field]: "abc" })).toThrow(
+          InvalidItemInputError
+        );
+      });
+
+      it(`${field}: true throws`, () => {
+        expect(() => parseItemInput({ name: "Widget", [field]: true })).toThrow(
+          InvalidItemInputError
+        );
+      });
+
+      it(`${field}: false throws`, () => {
+        expect(() => parseItemInput({ name: "Widget", [field]: false })).toThrow(
+          InvalidItemInputError
+        );
+      });
+
+      it(`${field}: empty array throws`, () => {
+        expect(() => parseItemInput({ name: "Widget", [field]: [] })).toThrow(
+          InvalidItemInputError
+        );
+      });
+
+      it(`${field}: single-element array throws`, () => {
+        expect(() => parseItemInput({ name: "Widget", [field]: [5] })).toThrow(
+          InvalidItemInputError
+        );
+      });
+
+      it(`${field}: plain object throws`, () => {
+        expect(() => parseItemInput({ name: "Widget", [field]: {} })).toThrow(
           InvalidItemInputError
         );
       });
