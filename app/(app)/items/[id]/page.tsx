@@ -1,6 +1,7 @@
 // app/(app)/items/[id]/page.tsx
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
+import { getCurrentUserId } from "../../../../lib/auth";
 import { getItem } from "../../../../lib/items";
 import { renderQrSvg } from "../../../../lib/qr";
 import { computeMargin, isLowStock } from "../../../../lib/item-helpers";
@@ -8,7 +9,10 @@ import { QrPrintLabel } from "../../../../components/QrPrintLabel";
 import { DeleteItemButton } from "../../../../components/DeleteItemButton";
 
 export default async function ItemDetailPage({ params }: { params: { id: string } }) {
-  const item = await getItem(params.id);
+  const userId = await getCurrentUserId();
+  if (!userId) redirect("/login");
+
+  const item = await getItem(userId, params.id);
   if (!item) notFound();
 
   const margin = computeMargin(item.cost, item.price);
