@@ -1,4 +1,4 @@
-// app/login/page.tsx
+// app/signup/page.tsx
 "use client";
 
 import { useState } from "react";
@@ -7,22 +7,27 @@ import Image from "next/image";
 import Link from "next/link";
 import { createSupabaseBrowserClient } from "../../lib/supabase/browser";
 
-export default function LoginPage() {
+export default function SignupPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const router = useRouter();
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setSubmitting(true);
     setError(null);
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
+    setSubmitting(true);
     const supabase = createSupabaseBrowserClient();
-    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+    const { error: signUpError } = await supabase.auth.signUp({ email, password });
     setSubmitting(false);
-    if (signInError) {
-      setError(signInError.message);
+    if (signUpError) {
+      setError(signUpError.message);
       return;
     }
     router.push("/");
@@ -48,6 +53,16 @@ export default function LoginPage() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
+          minLength={6}
+          className="rounded-lg border border-orange-300 p-3"
+        />
+        <input
+          type="password"
+          placeholder="Confirm password"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          required
+          minLength={6}
           className="rounded-lg border border-orange-300 p-3"
         />
         {error && <p className="text-center text-sm text-red-600">{error}</p>}
@@ -56,16 +71,11 @@ export default function LoginPage() {
           disabled={submitting}
           className="rounded-lg bg-orange-400 p-3 font-medium text-white disabled:opacity-50"
         >
-          {submitting ? "Logging in..." : "Log in"}
+          {submitting ? "Signing up..." : "Sign up"}
         </button>
-        <div className="flex justify-between text-sm">
-          <Link href="/signup" className="text-stone-500 underline">
-            Sign up
-          </Link>
-          <Link href="/forgot-password" className="text-stone-500 underline">
-            Forgot password?
-          </Link>
-        </div>
+        <Link href="/login" className="text-center text-sm text-stone-500 underline">
+          Already have an account? Log in
+        </Link>
       </form>
     </main>
   );
