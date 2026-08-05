@@ -68,9 +68,13 @@ export function parseItemInput(body: unknown): ItemInput {
   return input;
 }
 
-export async function listItems(search?: string): Promise<Item[]> {
+export async function listItems(ownerId: string, search?: string): Promise<Item[]> {
   const supabase = getSupabaseClient();
-  let query = supabase.from("items").select("*").order("updated_at", { ascending: false });
+  let query = supabase
+    .from("items")
+    .select("*")
+    .eq("owner_id", ownerId)
+    .order("updated_at", { ascending: false });
   if (search) {
     const escaped = escapeForOrFilter(search);
     query = query.or(`name.ilike."%${escaped}%",sku.ilike."%${escaped}%"`);
@@ -80,50 +84,71 @@ export async function listItems(search?: string): Promise<Item[]> {
   return data as Item[];
 }
 
-export async function getItem(id: string): Promise<Item | null> {
+export async function getItem(ownerId: string, id: string): Promise<Item | null> {
   const supabase = getSupabaseClient();
-  const { data, error } = await supabase.from("items").select("*").eq("id", id).maybeSingle();
-  if (error) throw error;
-  return data as Item | null;
-}
-
-export async function lookupByCode(code: string): Promise<Item | null> {
-  const supabase = getSupabaseClient();
-  const { data, error } = await supabase.from("items").select("*").eq("qr_code", code).maybeSingle();
-  if (error) throw error;
-  return data as Item | null;
-}
-
-async function codeExists(code: string): Promise<boolean> {
-  return (await lookupByCode(code)) !== null;
-}
-
-export async function createItem(input: ItemInput): Promise<Item> {
-  const supabase = getSupabaseClient();
-  const qr_code = input.qr_code ?? (await generateUniqueCode(codeExists));
   const { data, error } = await supabase
     .from("items")
-    .insert({ ...input, qr_code })
+    .select("*")
+    .eq("id", id)
+    .eq("owner_id", ownerId)
+    .maybeSingle();
+  if (error) throw error;
+  return data as Item | null;
+}
+
+export async function lookupByCode(ownerId: string, code: string): Promise<Item | null> {
+  const supabase = getSupabaseClient();
+  const { data, error } = await supabase
+    .from("items")
+    .select("*")
+    .eq("qr_code", code)
+    .eq("owner_id", ownerId)
+    .maybeSingle();
+  if (error) throw error;
+  return data as Item | null;
+}
+
+async function codeExists(ownerId: string, code: string): Promise<boolean> {
+  return (await lookupByCode(ownerId, code)) !== null;
+}
+
+export async function createItem(ownerId: string, input: ItemInput): Promise<Item> {
+  const supabase = getSupabaseClient();
+  const qr_code = input.qr_code ?? (await generateUniqueCode((code) => codeExists(ownerId, code)));
+  const { data, error } = await supabase
+    .from("items")
+    .insert({ ...input, qr_code, owner_id: ownerId })
     .select()
     .single();
   if (error) throw error;
   return data as Item;
 }
 
-export async function updateItem(id: string, input: Partial<ItemInput>): Promise<Item> {
+export async function updateItem(
+  ownerId: string,
+  id: string,
+  input: Partial<ItemInput>
+): Promise<Item> {
   const supabase = getSupabaseClient();
-  const { data, error } = await supabase.from("items").update(input).eq("id", id).select().single();
+  const { data, error } = await supabase
+    .from("items")
+    .update(input)
+    .eq("id", id)
+    .eq("owner_id", ownerId)
+    .select()
+    .single();
   if (error) throw error;
   return data as Item;
 }
 
-export async function deleteItem(id: string): Promise<void> {
+export async function deleteItem(ownerId: string, id: string): Promise<void> {
   const supabase = getSupabaseClient();
-  const { error } = await supabase.from("items").delete().eq("id", id);
+  const { error } = await supabase.from("items").delete().eq("id", id).eq("owner_id", ownerId);
   if (error) throw error;
 }
 
 export async function autocompleteValues(
+  ownerId: string,
   field: "location" | "category",
   search: string
 ): Promise<string[]> {
@@ -131,6 +156,7 @@ export async function autocompleteValues(
   const { data, error } = await supabase
     .from("items")
     .select(field)
+    .eq("owner_id", ownerId)
     .ilike(field, `%${search}%`)
     .not(field, "is", null)
     .limit(50);
