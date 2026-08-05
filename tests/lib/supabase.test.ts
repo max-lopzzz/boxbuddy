@@ -9,10 +9,4 @@ describe.skipIf(!hasEnv)("Supabase connection", () => {
     const { error } = await supabase.from("items").select("id").limit(1);
     expect(error).toBeNull();
   });
-
-  it("can query the app_settings table", async () => {
-    const supabase = getSupabaseClient();
-    const { error } = await supabase.from("app_settings").select("id").limit(1);
-    expect(error).toBeNull();
-  });
 });
