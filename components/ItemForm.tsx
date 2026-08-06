@@ -158,16 +158,28 @@ export function ItemForm({ item, prefillCode }: { item?: Item; prefillCode?: str
         ) : values.sku ? (
           <div className="flex items-center justify-between rounded-lg border border-orange-200 p-2">
             <span className="text-stone-800">{values.sku}</span>
-            <button
-              type="button"
-              onClick={() => {
-                setScanError(false);
-                setSkuMode("scanning");
-              }}
-              className="text-sm text-orange-500 underline"
-            >
-              Scan again
-            </button>
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setScanError(false);
+                  setSkuMode("scanning");
+                }}
+                className="text-sm text-orange-500 underline"
+              >
+                Scan again
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  update("sku", "");
+                  setSkuMode("empty");
+                }}
+                className="text-sm text-stone-500 underline"
+              >
+                Clear
+              </button>
+            </div>
           </div>
         ) : (
           <div className="flex flex-col gap-2">
