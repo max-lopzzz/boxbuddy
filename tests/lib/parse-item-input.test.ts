@@ -156,8 +156,8 @@ describe("parseItemInput", () => {
     }
   });
 
-  describe("optional string fields (sku, location, category, notes)", () => {
-    for (const field of ["sku", "location", "category", "notes"] as const) {
+  describe("optional string fields (location, category, notes)", () => {
+    for (const field of ["location", "category", "notes"] as const) {
       it(`${field}: undefined becomes null`, () => {
         const result = parseItemInput({ name: "Widget" });
         expect(result[field]).toBeNull();
@@ -181,28 +181,31 @@ describe("parseItemInput", () => {
     }
   });
 
-  it("passes through a provided qr_code", () => {
-    const result = parseItemInput({ name: "Widget", qr_code: "bb_abc123" });
-    expect(result.qr_code).toBe("bb_abc123");
+  it("passes through a provided sku", () => {
+    const result = parseItemInput({ name: "Widget", sku: "bb_abc123" });
+    expect(result.sku).toBe("bb_abc123");
   });
 
-  it("throws when qr_code is an empty string", () => {
-    expect(() => parseItemInput({ name: "Widget", qr_code: "" })).toThrow(InvalidItemInputError);
+  it("throws when sku is an empty string", () => {
+    expect(() => parseItemInput({ name: "Widget", sku: "" })).toThrow(InvalidItemInputError);
   });
 
-  it("throws when qr_code is only whitespace", () => {
-    expect(() => parseItemInput({ name: "Widget", qr_code: "   " })).toThrow(
-      InvalidItemInputError
-    );
+  it("throws when sku is only whitespace", () => {
+    expect(() => parseItemInput({ name: "Widget", sku: "   " })).toThrow(InvalidItemInputError);
   });
 
-  it("throws when qr_code is not a string", () => {
-    expect(() => parseItemInput({ name: "Widget", qr_code: 123 })).toThrow(InvalidItemInputError);
+  it("throws when sku is not a string", () => {
+    expect(() => parseItemInput({ name: "Widget", sku: 123 })).toThrow(InvalidItemInputError);
   });
 
-  it("does not include qr_code when not provided", () => {
+  it("does not include sku when not provided", () => {
     const result = parseItemInput({ name: "Widget" });
-    expect("qr_code" in result).toBe(false);
+    expect("sku" in result).toBe(false);
+  });
+
+  it("does not include sku when explicitly null", () => {
+    const result = parseItemInput({ name: "Widget", sku: null });
+    expect("sku" in result).toBe(false);
   });
 
   it("throws when body is null", () => {

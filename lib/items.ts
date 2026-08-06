@@ -1,6 +1,6 @@
 // lib/items.ts
 import { getSupabaseClient } from "./supabase";
-import { generateUniqueCode } from "./qr";
+import { generateUniqueSku } from "./barcode";
 import type { Item, ItemInput } from "./types";
 
 function escapeForOrFilter(value: string): string {
@@ -46,7 +46,6 @@ export function parseItemInput(body: unknown): ItemInput {
 
   const input: ItemInput = {
     name: b.name.trim(),
-    sku: parseOptionalString(b.sku, "sku"),
     quantity,
     reorder_at: parseOptionalNumber(b.reorder_at, "reorder_at"),
     location: parseOptionalString(b.location, "location"),
@@ -56,13 +55,14 @@ export function parseItemInput(body: unknown): ItemInput {
     price: parseOptionalNumber(b.price, "price"),
   };
 
-  // qr_code is intentionally allowed through when explicitly provided (e.g. adopting a scanned
+  // sku is intentionally allowed through when explicitly provided (e.g. adopting a scanned
   // barcode), but must be a non-empty string if present — never silently coerced from junk.
-  if (b.qr_code !== undefined) {
-    if (typeof b.qr_code !== "string" || b.qr_code.trim() === "") {
-      throw new InvalidItemInputError("qr_code must be a non-empty string if provided");
+  // undefined and null both mean "not provided" — the server generates one in that case.
+  if (b.sku !== undefined && b.sku !== null) {
+    if (typeof b.sku !== "string" || b.sku.trim() === "") {
+      throw new InvalidItemInputError("sku must be a non-empty string if provided");
     }
-    input.qr_code = b.qr_code;
+    input.sku = b.sku;
   }
 
   return input;
@@ -101,7 +101,7 @@ export async function lookupByCode(ownerId: string, code: string): Promise<Item 
   const { data, error } = await supabase
     .from("items")
     .select("*")
-    .eq("qr_code", code)
+    .eq("sku", code)
     .eq("owner_id", ownerId)
     .maybeSingle();
   if (error) throw error;
@@ -114,10 +114,10 @@ async function codeExists(ownerId: string, code: string): Promise<boolean> {
 
 export async function createItem(ownerId: string, input: ItemInput): Promise<Item> {
   const supabase = getSupabaseClient();
-  const qr_code = input.qr_code ?? (await generateUniqueCode((code) => codeExists(ownerId, code)));
+  const sku = input.sku ?? (await generateUniqueSku((code) => codeExists(ownerId, code)));
   const { data, error } = await supabase
     .from("items")
-    .insert({ ...input, qr_code, owner_id: ownerId })
+    .insert({ ...input, sku, owner_id: ownerId })
     .select()
     .single();
   if (error) throw error;

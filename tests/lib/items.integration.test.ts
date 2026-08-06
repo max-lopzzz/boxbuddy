@@ -44,10 +44,9 @@ describe.skipIf(!hasEnv)("items DB layer (integration)", () => {
     if (ownerBId) await supabase.auth.admin.deleteUser(ownerBId);
   });
 
-  it("creates an item with a generated qr_code, owned by the caller", async () => {
+  it("creates an item with a generated sku, owned by the caller", async () => {
     const item = await createItem(ownerAId, {
       name: "Integration Test Widget",
-      sku: "ITW-1",
       quantity: 10,
       reorder_at: 2,
       location: "Shelf A",
@@ -57,7 +56,7 @@ describe.skipIf(!hasEnv)("items DB layer (integration)", () => {
       price: 9.99,
     });
     createdId = item.id;
-    expect(item.qr_code.startsWith("bb_")).toBe(true);
+    expect(item.sku.startsWith("bb_")).toBe(true);
     expect(item.name).toBe("Integration Test Widget");
   });
 
@@ -71,20 +70,19 @@ describe.skipIf(!hasEnv)("items DB layer (integration)", () => {
     expect(item).toBeNull();
   });
 
-  it("finds the item by qr_code for its owner only", async () => {
+  it("finds the item by sku for its owner only", async () => {
     const created = await getItem(ownerAId, createdId);
-    const foundByOwner = await lookupByCode(ownerAId, created!.qr_code);
+    const foundByOwner = await lookupByCode(ownerAId, created!.sku);
     expect(foundByOwner?.id).toBe(createdId);
 
-    const foundByOtherOwner = await lookupByCode(ownerBId, created!.qr_code);
+    const foundByOtherOwner = await lookupByCode(ownerBId, created!.sku);
     expect(foundByOtherOwner).toBeNull();
   });
 
-  it("allows a different owner to use the identical qr_code", async () => {
+  it("allows a different owner to use the identical sku", async () => {
     const created = await getItem(ownerAId, createdId);
     const otherItem = await createItem(ownerBId, {
       name: "Owner B's Own Widget",
-      sku: null,
       quantity: 1,
       reorder_at: null,
       location: null,
@@ -92,18 +90,17 @@ describe.skipIf(!hasEnv)("items DB layer (integration)", () => {
       notes: null,
       cost: null,
       price: null,
-      qr_code: created!.qr_code,
+      sku: created!.sku,
     });
-    expect(otherItem.qr_code).toBe(created!.qr_code);
+    expect(otherItem.sku).toBe(created!.sku);
     await deleteItem(ownerBId, otherItem.id);
   });
 
-  it("rejects the owner reusing their own qr_code on a second item", async () => {
+  it("rejects the owner reusing their own sku on a second item", async () => {
     const created = await getItem(ownerAId, createdId);
     await expect(
       createItem(ownerAId, {
         name: "Duplicate Code Item",
-        sku: null,
         quantity: 1,
         reorder_at: null,
         location: null,
@@ -111,7 +108,7 @@ describe.skipIf(!hasEnv)("items DB layer (integration)", () => {
         notes: null,
         cost: null,
         price: null,
-        qr_code: created!.qr_code,
+        sku: created!.sku,
       })
     ).rejects.toThrow();
   });

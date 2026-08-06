@@ -32,6 +32,13 @@ inventory — no user can see, edit, or delete another account's items.
      favor of a per-owner one, deletes any pre-existing test data that has no owner, and
      enables row level security on `items` (running `alter table items enable row level
      security;` is safe either way — it's a no-op if already enabled).
+   - **Existing project that predates the barcode SKU merge:** also run this migration, which
+     merges the old separate `qr_code` and `sku` columns into a single `sku` column (existing
+     `qr_code` values are kept; the old free-text `sku` values are dropped):
+     ```sql
+     alter table items drop column sku;
+     alter table items rename column qr_code to sku;
+     ```
    - **Either path — verify RLS is actually blocking direct access:** once you have your
      anon key (step 1), confirm the anon key alone cannot read inventory data:
      ```bash

@@ -1,8 +1,6 @@
-// lib/types.ts
 export interface Item {
   id: string;
-  qr_code: string;
-  sku: string | null;
+  sku: string;
   name: string;
   quantity: number;
   reorder_at: number | null;
@@ -18,7 +16,6 @@ export interface Item {
 
 export type ItemInput = {
   name: string;
-  sku: string | null;
   quantity: number;
   reorder_at: number | null;
   location: string | null;
@@ -26,6 +23,6 @@ export type ItemInput = {
   notes: string | null;
   cost: number | null;
   price: number | null;
-  qr_code?: string;
+  sku?: string;
   photo_url?: string | null;
 };
