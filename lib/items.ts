@@ -62,6 +62,9 @@ export function parseItemInput(body: unknown): ItemInput {
     if (typeof b.sku !== "string" || b.sku.trim() === "") {
       throw new InvalidItemInputError("sku must be a non-empty string if provided");
     }
+    if (b.sku.length > 64) {
+      throw new InvalidItemInputError("sku must be 64 characters or fewer");
+    }
     input.sku = b.sku;
   }
 

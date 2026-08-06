@@ -1,6 +1,6 @@
 # BoxBuddy
 
-Small-business inventory tracker with QR code generation/scanning, cost/price/margin
+Small-business inventory tracker with barcode generation/scanning, cost/price/margin
 tracking, and low-stock alerts. See `docs/superpowers/specs/2026-08-04-inventory-tracker-design.md`
 for the full design.
 
@@ -36,9 +36,22 @@ inventory — no user can see, edit, or delete another account's items.
      merges the old separate `qr_code` and `sku` columns into a single `sku` column (existing
      `qr_code` values are kept; the old free-text `sku` values are dropped):
      ```sql
-     alter table items drop column sku;
-     alter table items rename column qr_code to sku;
+     do $$
+     begin
+       if exists (
+         select 1 from information_schema.columns
+         where table_name = 'items' and column_name = 'qr_code'
+       ) then
+         create table if not exists items_legacy_sku_backup as
+           select id, sku from items;
+         alter table items drop column if exists sku;
+         alter table items rename column qr_code to sku;
+       end if;
+     end $$;
      ```
+     Run this migration and deploy the corresponding code change together — if the old code
+     (still querying `qr_code`) runs after this migration, or the new code (querying `sku`)
+     runs before it, requests will fail until both sides match.
    - **Either path — verify RLS is actually blocking direct access:** once you have your
      anon key (step 1), confirm the anon key alone cannot read inventory data:
      ```bash

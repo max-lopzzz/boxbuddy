@@ -26,6 +26,10 @@ export async function generateUniqueSku(
   throw new Error("Could not generate a unique SKU after 10 attempts");
 }
 
-export function renderBarcodeSvg(sku: string): string {
-  return bwipjs.toSVG({ bcid: "code128", text: sku });
+export function renderBarcodeSvg(sku: string): string | null {
+  try {
+    return bwipjs.toSVG({ bcid: "code128", text: sku });
+  } catch {
+    return null;
+  }
 }
