@@ -3,9 +3,9 @@ import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { getCurrentUserId } from "../../../../lib/auth";
 import { getItem } from "../../../../lib/items";
-import { renderQrSvg } from "../../../../lib/qr";
+import { renderBarcodeSvg } from "../../../../lib/barcode";
 import { computeMargin, isLowStock } from "../../../../lib/item-helpers";
-import { QrPrintLabel } from "../../../../components/QrPrintLabel";
+import { BarcodePrintLabel } from "../../../../components/BarcodePrintLabel";
 import { DeleteItemButton } from "../../../../components/DeleteItemButton";
 
 export default async function ItemDetailPage({ params }: { params: { id: string } }) {
@@ -17,7 +17,7 @@ export default async function ItemDetailPage({ params }: { params: { id: string 
 
   const margin = computeMargin(item.cost, item.price);
   const low = isLowStock(item.quantity, item.reorder_at);
-  const qrSvg = await renderQrSvg(item.qr_code);
+  const barcodeSvg = renderBarcodeSvg(item.sku);
 
   return (
     <main className="mx-auto flex max-w-lg flex-col gap-4 p-4">
@@ -38,7 +38,7 @@ export default async function ItemDetailPage({ params }: { params: { id: string 
       )}
 
       <dl className="grid grid-cols-2 gap-2 text-sm">
-        <Field label="SKU" value={item.sku ?? "—"} />
+        <Field label="SKU" value={item.sku} />
         <Field label="Quantity" value={String(item.quantity)} />
         <Field label="Location" value={item.location ?? "—"} />
         <Field label="Category" value={item.category ?? "—"} />
@@ -49,7 +49,7 @@ export default async function ItemDetailPage({ params }: { params: { id: string 
 
       {item.notes && <p className="text-sm text-stone-600">{item.notes}</p>}
 
-      <QrPrintLabel svg={qrSvg} name={item.name} sku={item.sku} />
+      <BarcodePrintLabel svg={barcodeSvg} name={item.name} sku={item.sku} />
 
       <div className="flex gap-2">
         <Link

@@ -4,8 +4,7 @@ create extension if not exists "pgcrypto";
 create table if not exists items (
   id uuid primary key default gen_random_uuid(),
   owner_id uuid not null references auth.users(id) on delete cascade,
-  qr_code text not null,
-  sku text,
+  sku text not null,
   name text not null,
   quantity integer not null default 0,
   reorder_at integer,
@@ -17,7 +16,7 @@ create table if not exists items (
   photo_url text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
-  unique (owner_id, qr_code)
+  unique (owner_id, sku)
 );
 
 create index if not exists items_owner_id_idx on items (owner_id);

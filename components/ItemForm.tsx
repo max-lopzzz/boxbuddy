@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import type { Item, ItemInput } from "../lib/types";
 import { apiFetch } from "../lib/api-client";
 import { AutocompleteInput } from "./AutocompleteInput";
+import { BarcodeScanner } from "./BarcodeScanner";
 
 type ItemFormValues = {
   name: string;
@@ -19,10 +20,12 @@ type ItemFormValues = {
   price: string;
 };
 
-function toFormValues(item?: Item): ItemFormValues {
+type SkuMode = "empty" | "scanning" | "filled" | "auto";
+
+function toFormValues(item?: Item, prefillCode?: string): ItemFormValues {
   return {
     name: item?.name ?? "",
-    sku: item?.sku ?? "",
+    sku: item?.sku ?? prefillCode ?? "",
     quantity: item ? String(item.quantity) : "0",
     reorder_at:
       item?.reorder_at !== null && item?.reorder_at !== undefined ? String(item.reorder_at) : "",
@@ -35,7 +38,9 @@ function toFormValues(item?: Item): ItemFormValues {
 }
 
 export function ItemForm({ item, prefillCode }: { item?: Item; prefillCode?: string }) {
-  const [values, setValues] = useState<ItemFormValues>(toFormValues(item));
+  const [values, setValues] = useState<ItemFormValues>(toFormValues(item, prefillCode));
+  const [skuMode, setSkuMode] = useState<SkuMode>(item?.sku || prefillCode ? "filled" : "empty");
+  const [scanError, setScanError] = useState(false);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoError, setPhotoError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -58,6 +63,11 @@ export function ItemForm({ item, prefillCode }: { item?: Item; prefillCode?: str
     setPhotoFile(file);
   }
 
+  function handleScan(code: string) {
+    update("sku", code);
+    setSkuMode("filled");
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSubmitting(true);
@@ -65,7 +75,6 @@ export function ItemForm({ item, prefillCode }: { item?: Item; prefillCode?: str
 
     const payload: ItemInput = {
       name: values.name,
-      sku: values.sku || null,
       quantity: Number(values.quantity) || 0,
       reorder_at: values.reorder_at === "" ? null : Number(values.reorder_at),
       location: values.location || null,
@@ -73,7 +82,7 @@ export function ItemForm({ item, prefillCode }: { item?: Item; prefillCode?: str
       notes: values.notes || null,
       cost: values.cost === "" ? null : Number(values.cost),
       price: values.price === "" ? null : Number(values.price),
-      ...(prefillCode ? { qr_code: prefillCode } : {}),
+      ...(values.sku ? { sku: values.sku } : {}),
     };
 
     const url = savedItemState ? `/api/items/${savedItemState.id}` : "/api/items";
@@ -127,14 +136,68 @@ export function ItemForm({ item, prefillCode }: { item?: Item; prefillCode?: str
         />
       </label>
 
-      <label className="flex flex-col gap-1">
+      <div className="flex flex-col gap-1">
         <span className="text-sm text-stone-600">SKU</span>
-        <input
-          value={values.sku}
-          onChange={(e) => update("sku", e.target.value)}
-          className="rounded-lg border border-orange-200 p-2"
-        />
-      </label>
+        {skuMode === "scanning" ? (
+          <div className="flex flex-col gap-2">
+            <BarcodeScanner onScan={handleScan} onCameraError={() => setScanError(true)} />
+            <button
+              type="button"
+              onClick={() => setSkuMode(values.sku ? "filled" : "empty")}
+              className="text-sm text-stone-500 underline"
+            >
+              Cancel
+            </button>
+            {scanError && (
+              <p className="text-sm text-red-600">
+                Couldn&apos;t access the camera. Try &quot;I don&apos;t have a barcode&quot;
+                instead.
+              </p>
+            )}
+          </div>
+        ) : values.sku ? (
+          <div className="flex items-center justify-between rounded-lg border border-orange-200 p-2">
+            <span className="text-stone-800">{values.sku}</span>
+            <button
+              type="button"
+              onClick={() => {
+                setScanError(false);
+                setSkuMode("scanning");
+              }}
+              className="text-sm text-orange-500 underline"
+            >
+              Scan again
+            </button>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-2">
+            <p className="text-sm text-stone-500">
+              {skuMode === "auto"
+                ? "A code will be generated automatically when you save."
+                : "Scan this item's barcode, or generate one if it doesn't have one."}
+            </p>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setScanError(false);
+                  setSkuMode("scanning");
+                }}
+                className="flex-1 rounded-lg border border-orange-300 p-2 text-sm text-stone-700"
+              >
+                Scan barcode
+              </button>
+              <button
+                type="button"
+                onClick={() => setSkuMode("auto")}
+                className="flex-1 rounded-lg border border-stone-300 p-2 text-sm text-stone-700"
+              >
+                I don&apos;t have a barcode
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
 
       <div className="flex gap-2">
         <label className="flex flex-1 flex-col gap-1">
