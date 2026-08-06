@@ -186,7 +186,9 @@ export function ItemForm({ item, prefillCode }: { item?: Item; prefillCode?: str
             <p className="text-sm text-stone-500">
               {skuMode === "auto"
                 ? "A code will be generated automatically when you save."
-                : "Scan this item's barcode, or generate one if it doesn't have one."}
+                : savedItemState
+                  ? "Scan this item's new barcode."
+                  : "Scan this item's barcode, or generate one if it doesn't have one."}
             </p>
             <div className="flex gap-2">
               <button
@@ -199,13 +201,15 @@ export function ItemForm({ item, prefillCode }: { item?: Item; prefillCode?: str
               >
                 Scan barcode
               </button>
-              <button
-                type="button"
-                onClick={() => setSkuMode("auto")}
-                className="flex-1 rounded-lg border border-stone-300 p-2 text-sm text-stone-700"
-              >
-                I don&apos;t have a barcode
-              </button>
+              {!savedItemState && (
+                <button
+                  type="button"
+                  onClick={() => setSkuMode("auto")}
+                  className="flex-1 rounded-lg border border-stone-300 p-2 text-sm text-stone-700"
+                >
+                  I don&apos;t have a barcode
+                </button>
+              )}
             </div>
           </div>
         )}
