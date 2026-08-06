@@ -44,6 +44,7 @@ inventory — no user can see, edit, or delete another account's items.
        ) then
          create table if not exists items_legacy_sku_backup as
            select id, sku from items;
+         alter table items_legacy_sku_backup enable row level security;
          alter table items drop column if exists sku;
          alter table items rename column qr_code to sku;
        end if;
