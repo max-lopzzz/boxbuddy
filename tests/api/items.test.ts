@@ -158,13 +158,12 @@ describe.skipIf(!hasEnv)("items API routes (integration)", () => {
     expect(res.status).toBe(400);
   });
 
-  it("creates an item and returns it with a generated qr_code", async () => {
+  it("creates an item and returns it with a generated sku", async () => {
     const res = await fetch(`${baseUrl}/api/items`, {
       method: "POST",
       headers: { "Content-Type": "application/json", Cookie: sessionCookie },
       body: JSON.stringify({
         name: "API Test Widget",
-        sku: "ATW-1",
         quantity: 10,
         reorder_at: 2,
         location: "Test Shelf",
@@ -177,8 +176,8 @@ describe.skipIf(!hasEnv)("items API routes (integration)", () => {
     expect(res.status).toBe(201);
     const body = await res.json();
     expect(body.item.name).toBe("API Test Widget");
-    expect(typeof body.item.qr_code).toBe("string");
-    expect(body.item.qr_code.startsWith("bb_")).toBe(true);
+    expect(typeof body.item.sku).toBe("string");
+    expect(body.item.sku.startsWith("bb_")).toBe(true);
     createdIds.push(body.item.id);
   });
 
@@ -324,7 +323,7 @@ describe.skipIf(!hasEnv)("items API routes (integration)", () => {
     expect(res.status).toBe(404);
   });
 
-  it("returns 409 when creating a duplicate qr_code for the same account", async () => {
+  it("returns 409 when creating a duplicate sku for the same account", async () => {
     const existing = await fetch(`${baseUrl}/api/items/${createdIds[0]}`, {
       headers: { Cookie: sessionCookie },
     }).then((r) => r.json());
@@ -334,7 +333,6 @@ describe.skipIf(!hasEnv)("items API routes (integration)", () => {
       headers: { "Content-Type": "application/json", Cookie: sessionCookie },
       body: JSON.stringify({
         name: "Duplicate Code Item",
-        sku: null,
         quantity: 1,
         reorder_at: null,
         location: null,
@@ -342,13 +340,13 @@ describe.skipIf(!hasEnv)("items API routes (integration)", () => {
         notes: null,
         cost: null,
         price: null,
-        qr_code: existing.item.qr_code,
+        sku: existing.item.sku,
       }),
     });
     expect(res.status).toBe(409);
   });
 
-  it("a different account CAN use the same qr_code without conflict", async () => {
+  it("a different account CAN use the same sku without conflict", async () => {
     const existing = await fetch(`${baseUrl}/api/items/${createdIds[0]}`, {
       headers: { Cookie: sessionCookie },
     }).then((r) => r.json());
@@ -358,7 +356,6 @@ describe.skipIf(!hasEnv)("items API routes (integration)", () => {
       headers: { "Content-Type": "application/json", Cookie: otherSessionCookie },
       body: JSON.stringify({
         name: "Other Account's Item",
-        sku: null,
         quantity: 1,
         reorder_at: null,
         location: null,
@@ -366,7 +363,7 @@ describe.skipIf(!hasEnv)("items API routes (integration)", () => {
         notes: null,
         cost: null,
         price: null,
-        qr_code: existing.item.qr_code,
+        sku: existing.item.sku,
       }),
     });
     expect(res.status).toBe(201);
@@ -379,13 +376,13 @@ describe.skipIf(!hasEnv)("items API routes (integration)", () => {
     });
   });
 
-  it("looks up the item by its qr_code", async () => {
+  it("looks up the item by its sku", async () => {
     const existing = await fetch(`${baseUrl}/api/items/${createdIds[0]}`, {
       headers: { Cookie: sessionCookie },
     }).then((r) => r.json());
 
     const res = await fetch(
-      `${baseUrl}/api/items/lookup-by-code?code=${encodeURIComponent(existing.item.qr_code)}`,
+      `${baseUrl}/api/items/lookup-by-code?code=${encodeURIComponent(existing.item.sku)}`,
       { headers: { Cookie: sessionCookie } }
     );
     expect(res.status).toBe(200);
