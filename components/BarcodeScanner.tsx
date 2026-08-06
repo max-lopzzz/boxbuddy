@@ -18,7 +18,10 @@ export function BarcodeScanner({
   const scannerRef = useRef<Html5Qrcode | null>(null);
 
   useEffect(() => {
-    const scanner = new Html5Qrcode(SCANNER_ELEMENT_ID);
+    const scanner = new Html5Qrcode(
+      SCANNER_ELEMENT_ID,
+      formatsToSupport ? { formatsToSupport, verbose: false } : undefined
+    );
     scannerRef.current = scanner;
     let cancelled = false;
     let started = false;
@@ -26,7 +29,7 @@ export function BarcodeScanner({
     scanner
       .start(
         { facingMode: "environment" },
-        { fps: 10, qrbox: 250, ...(formatsToSupport ? { formatsToSupport } : {}) },
+        { fps: 10, qrbox: 250 },
         (decodedText) => {
           onScan(decodedText);
         },
