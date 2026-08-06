@@ -3,6 +3,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Html5QrcodeSupportedFormats } from "html5-qrcode";
 import type { Item, ItemInput } from "../lib/types";
 import { apiFetch } from "../lib/api-client";
 import { AutocompleteInput } from "./AutocompleteInput";
@@ -140,7 +141,17 @@ export function ItemForm({ item, prefillCode }: { item?: Item; prefillCode?: str
         <span className="text-sm text-stone-600">SKU</span>
         {skuMode === "scanning" ? (
           <div className="flex flex-col gap-2">
-            <BarcodeScanner onScan={handleScan} onCameraError={() => setScanError(true)} />
+            <BarcodeScanner
+              onScan={handleScan}
+              onCameraError={() => setScanError(true)}
+              formatsToSupport={[
+                Html5QrcodeSupportedFormats.CODE_128,
+                Html5QrcodeSupportedFormats.EAN_13,
+                Html5QrcodeSupportedFormats.EAN_8,
+                Html5QrcodeSupportedFormats.UPC_A,
+                Html5QrcodeSupportedFormats.UPC_E,
+              ]}
+            />
             <button
               type="button"
               onClick={() => setSkuMode(values.sku ? "filled" : "empty")}
@@ -169,16 +180,18 @@ export function ItemForm({ item, prefillCode }: { item?: Item; prefillCode?: str
               >
                 Scan again
               </button>
-              <button
-                type="button"
-                onClick={() => {
-                  update("sku", "");
-                  setSkuMode("empty");
-                }}
-                className="text-sm text-stone-500 underline"
-              >
-                Clear
-              </button>
+              {!savedItemState && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    update("sku", "");
+                    setSkuMode("empty");
+                  }}
+                  className="text-sm text-stone-500 underline"
+                >
+                  Clear
+                </button>
+              )}
             </div>
           </div>
         ) : (

@@ -2,16 +2,18 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { Html5Qrcode } from "html5-qrcode";
+import { Html5Qrcode, Html5QrcodeSupportedFormats } from "html5-qrcode";
 
 const SCANNER_ELEMENT_ID = "barcode-scanner-region";
 
 export function BarcodeScanner({
   onScan,
   onCameraError,
+  formatsToSupport,
 }: {
   onScan: (code: string) => void;
   onCameraError: () => void;
+  formatsToSupport?: Html5QrcodeSupportedFormats[];
 }) {
   const scannerRef = useRef<Html5Qrcode | null>(null);
 
@@ -24,7 +26,7 @@ export function BarcodeScanner({
     scanner
       .start(
         { facingMode: "environment" },
-        { fps: 10, qrbox: 250 },
+        { fps: 10, qrbox: 250, ...(formatsToSupport ? { formatsToSupport } : {}) },
         (decodedText) => {
           onScan(decodedText);
         },
@@ -49,7 +51,7 @@ export function BarcodeScanner({
         scanner.stop().catch(() => {});
       }
     };
-  }, [onScan, onCameraError]);
+  }, [onScan, onCameraError, formatsToSupport]);
 
   return <div id={SCANNER_ELEMENT_ID} className="mx-auto w-full max-w-sm" />;
 }
