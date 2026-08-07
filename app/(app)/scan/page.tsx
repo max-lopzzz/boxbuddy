@@ -42,7 +42,7 @@ export default function ScanPage() {
       {notFoundCode && (
         <div className="rounded-lg bg-orange-50 p-3 text-center">
           <p className="text-sm text-stone-600">
-            {t("scan.noItemFoundPrefix")} "{notFoundCode}".
+            {t("scan.noItemFoundPrefix")} “{notFoundCode}”.
           </p>
           <button
             onClick={() => router.push(`/items/new?code=${encodeURIComponent(notFoundCode)}`)}
