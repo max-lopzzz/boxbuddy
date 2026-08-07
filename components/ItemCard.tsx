@@ -1,10 +1,14 @@
 // components/ItemCard.tsx
+"use client";
+
 import Link from "next/link";
 import type { Item } from "../lib/types";
 import { isLowStock } from "../lib/item-helpers";
+import { useTranslation } from "../lib/i18n/client";
 
 export function ItemCard({ item }: { item: Item }) {
   const low = isLowStock(item.quantity, item.reorder_at);
+  const { t } = useTranslation();
   return (
     <Link
       href={`/items/${item.id}`}
@@ -32,7 +36,7 @@ export function ItemCard({ item }: { item: Item }) {
       {low && (
         <span className="flex items-center gap-1 rounded-full bg-red-100 px-2 py-1 text-xs font-medium text-red-700">
           <span aria-hidden="true">⚠️</span>
-          Low stock
+          {t("common.lowStock")}
         </span>
       )}
     </Link>

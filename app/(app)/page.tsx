@@ -7,31 +7,36 @@ import { SearchBar } from "../../components/SearchBar";
 import { EmptyState } from "../../components/EmptyState";
 import { isLowStock } from "../../lib/item-helpers";
 import { apiFetch } from "../../lib/api-client";
+import { useTranslation } from "../../lib/i18n/client";
 import type { Item } from "../../lib/types";
 
 export default function DashboardPage() {
   const [items, setItems] = useState<Item[] | null>(null);
   const [search, setSearch] = useState("");
   const [fetchError, setFetchError] = useState<string | null>(null);
+  const { t } = useTranslation();
 
-  const fetchItems = useCallback(async (query: string) => {
-    setItems(null);
-    setFetchError(null);
-    const url = query ? `/api/items?search=${encodeURIComponent(query)}` : "/api/items";
-    try {
-      const res = await apiFetch(url);
-      if (!res.ok) {
-        setFetchError("Couldn't load your inventory. Please try again.");
+  const fetchItems = useCallback(
+    async (query: string) => {
+      setItems(null);
+      setFetchError(null);
+      const url = query ? `/api/items?search=${encodeURIComponent(query)}` : "/api/items";
+      try {
+        const res = await apiFetch(url);
+        if (!res.ok) {
+          setFetchError(t("dashboard.couldNotLoadInventory"));
+          setItems([]);
+          return;
+        }
+        const body = await res.json();
+        setItems(body.items ?? []);
+      } catch {
+        setFetchError(t("dashboard.couldNotLoadInventory"));
         setItems([]);
-        return;
       }
-      const body = await res.json();
-      setItems(body.items ?? []);
-    } catch {
-      setFetchError("Couldn't load your inventory. Please try again.");
-      setItems([]);
-    }
-  }, []);
+    },
+    [t]
+  );
 
   useEffect(() => {
     fetchItems(search);
@@ -47,30 +52,35 @@ export default function DashboardPage() {
       )}
 
       <div className="grid grid-cols-3 gap-2">
-        <SummaryCard label="Items" value={items?.length ?? "…"} />
-        <SummaryCard label="Cost value" value={`$${totalCostValue.toFixed(2)}`} />
-        <SummaryCard label="Low stock" value={lowStockCount} />
+        <SummaryCard label={t("dashboard.itemsLabel")} value={items?.length ?? "…"} />
+        <SummaryCard label={t("dashboard.costValueLabel")} value={`$${totalCostValue.toFixed(2)}`} />
+        <SummaryCard label={t("common.lowStock")} value={lowStockCount} />
       </div>
 
       <SearchBar onSearch={setSearch} />
 
-      {items === null && <EmptyState illustration="loading" title="Loading your inventory…" />}
+      {items === null && (
+        <EmptyState illustration="loading" title={t("dashboard.loadingInventory")} />
+      )}
 
       {items !== null && items.length === 0 && search === "" && (
         <EmptyState
           illustration="greet"
-          title="No items yet"
-          subtitle="Add your first item to get started."
+          title={t("dashboard.noItemsYetTitle")}
+          subtitle={t("dashboard.noItemsYetSubtitle")}
           action={
             <Link href="/items/new" className="rounded-lg bg-orange-400 px-4 py-2 text-white">
-              Add item
+              {t("dashboard.addItem")}
             </Link>
           }
         />
       )}
 
       {items !== null && items.length === 0 && search !== "" && (
-        <EmptyState illustration="no-results" title={`No matches for "${search}"`} />
+        <EmptyState
+          illustration="no-results"
+          title={`${t("dashboard.noMatchesForPrefix")} "${search}"`}
+        />
       )}
 
       {items !== null && items.length > 0 && (
@@ -83,10 +93,10 @@ export default function DashboardPage() {
 
       <div className="fixed bottom-4 left-1/2 flex -translate-x-1/2 gap-3">
         <Link href="/scan" className="rounded-full bg-stone-800 px-5 py-3 text-white shadow-lg">
-          Scan
+          {t("dashboard.scanButton")}
         </Link>
         <Link href="/items/new" className="rounded-full bg-orange-400 px-5 py-3 text-white shadow-lg">
-          Add item
+          {t("dashboard.addItem")}
         </Link>
       </div>
     </main>
