@@ -1,6 +1,8 @@
 // components/BarcodePrintLabel.tsx
 "use client";
 
+import { useTranslation } from "../lib/i18n/client";
+
 export function BarcodePrintLabel({
   svg,
   name,
@@ -10,6 +12,7 @@ export function BarcodePrintLabel({
   name: string;
   sku: string;
 }) {
+  const { t } = useTranslation();
   return (
     <div className="flex flex-col items-center gap-1 rounded-xl border border-dashed border-stone-300 p-4 print:border-none">
       {svg ? (
@@ -18,7 +21,7 @@ export function BarcodePrintLabel({
           dangerouslySetInnerHTML={{ __html: svg }}
         />
       ) : (
-        <p className="text-sm text-red-600">Couldn&apos;t draw a barcode for this code.</p>
+        <p className="text-sm text-red-600">{t("barcodePrintLabel.couldNotDraw")}</p>
       )}
       <p className="text-sm font-medium text-stone-800">{name}</p>
       <p className="text-xs text-stone-500">{sku}</p>
@@ -26,7 +29,7 @@ export function BarcodePrintLabel({
         onClick={() => window.print()}
         className="mt-2 text-sm text-orange-500 underline print:hidden"
       >
-        Print label
+        {t("barcodePrintLabel.printLabel")}
       </button>
     </div>
   );
