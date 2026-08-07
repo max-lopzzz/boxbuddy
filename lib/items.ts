@@ -87,6 +87,16 @@ export async function listItems(ownerId: string, search?: string): Promise<Item[
   return data as Item[];
 }
 
+export async function getItemCount(ownerId: string): Promise<number> {
+  const supabase = getSupabaseClient();
+  const { count, error } = await supabase
+    .from("items")
+    .select("*", { count: "exact", head: true })
+    .eq("owner_id", ownerId);
+  if (error) throw error;
+  return count ?? 0;
+}
+
 export async function getItem(ownerId: string, id: string): Promise<Item | null> {
   const supabase = getSupabaseClient();
   const { data, error } = await supabase

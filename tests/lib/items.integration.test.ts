@@ -8,6 +8,7 @@ import {
   deleteItem,
   lookupByCode,
   listItems,
+  getItemCount,
 } from "../../lib/items";
 
 const hasEnv = Boolean(process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY);
@@ -128,6 +129,25 @@ describe.skipIf(!hasEnv)("items DB layer (integration)", () => {
 
     const ownerBItems = await listItems(ownerBId, "Integration Test Widget");
     expect(ownerBItems.some((i) => i.id === createdId)).toBe(false);
+  });
+
+  it("counts items scoped to the requesting owner", async () => {
+    const ownerACountBefore = await getItemCount(ownerAId);
+    const ownerBCountBefore = await getItemCount(ownerBId);
+    const created = await createItem(ownerAId, {
+      name: "Count Test Widget",
+      quantity: 1,
+      reorder_at: null,
+      location: null,
+      category: null,
+      notes: null,
+      cost: null,
+      price: null,
+    });
+    expect(await getItemCount(ownerAId)).toBe(ownerACountBefore + 1);
+    expect(await getItemCount(ownerBId)).toBe(ownerBCountBefore);
+    await deleteItem(ownerAId, created.id);
+    expect(await getItemCount(ownerAId)).toBe(ownerACountBefore);
   });
 
   it("a different owner's delete attempt has no effect", async () => {
