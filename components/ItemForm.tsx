@@ -229,7 +229,7 @@ export function ItemForm({ item, prefillCode }: { item?: Item; prefillCode?: str
 
       <div className="flex gap-2">
         <label className="flex min-w-0 flex-1 flex-col gap-1">
-          <FieldLabel label={t("common.quantity")} hint={t("itemForm.reorderAtHint")} />
+          <FieldLabel label={t("common.quantity")} hint={t("itemForm.quantityHint")} />
           <input
             type="number"
             placeholder="0"

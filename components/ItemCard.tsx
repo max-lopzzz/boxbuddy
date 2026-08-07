@@ -29,7 +29,7 @@ export function ItemCard({ item }: { item: Item }) {
       <div className="flex-1">
         <p className="font-medium text-stone-800">{item.name}</p>
         <p className="text-sm text-stone-500">
-          Qty {item.quantity}
+          {t("common.qty")} {item.quantity}
           {item.location ? ` · ${item.location}` : ""}
         </p>
       </div>

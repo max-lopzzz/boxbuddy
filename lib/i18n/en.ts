@@ -9,6 +9,7 @@ export const en = {
   "common.cost": "Cost",
   "common.price": "Price",
   "common.lowStock": "Low stock",
+  "common.qty": "Qty",
   "common.saving": "Saving…",
   "common.passwordsDoNotMatch": "Passwords do not match",
 
@@ -75,6 +76,7 @@ export const en = {
   "itemForm.reorderAtLabel": "Reorder at",
   "itemForm.reorderAtHint":
     "When quantity drops to this number or below, the item is flagged as low stock.",
+  "itemForm.quantityHint": "How many of this item you currently have in stock.",
   "itemForm.reorderAtPlaceholder": "e.g. 5",
   "itemForm.locationHint": "Where this item is stored, e.g. a shelf or bin name.",
   "itemForm.locationPlaceholder": "e.g. Shelf A",

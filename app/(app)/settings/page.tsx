@@ -44,6 +44,7 @@ export default function SettingsPage() {
 
   async function handleLanguageChange(next: Locale) {
     setLocale(next);
+    router.refresh();
     await apiFetch("/api/settings/locale", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
