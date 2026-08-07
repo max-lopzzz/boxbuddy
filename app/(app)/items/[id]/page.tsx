@@ -5,6 +5,7 @@ import { getCurrentUserId } from "../../../../lib/auth";
 import { getItem } from "../../../../lib/items";
 import { renderBarcodeSvg } from "../../../../lib/barcode";
 import { computeMargin, isLowStock } from "../../../../lib/item-helpers";
+import { getLocale, getDictionary } from "../../../../lib/i18n/server";
 import { BarcodePrintLabel } from "../../../../components/BarcodePrintLabel";
 import { DeleteItemButton } from "../../../../components/DeleteItemButton";
 
@@ -18,6 +19,7 @@ export default async function ItemDetailPage({ params }: { params: { id: string 
   const margin = computeMargin(item.cost, item.price);
   const low = isLowStock(item.quantity, item.reorder_at);
   const barcodeSvg = renderBarcodeSvg(item.sku);
+  const dict = getDictionary(getLocale());
 
   return (
     <main className="mx-auto flex max-w-lg flex-col gap-4 p-4">
@@ -33,18 +35,27 @@ export default async function ItemDetailPage({ params }: { params: { id: string 
       <h1 className="text-xl font-semibold text-stone-800">{item.name}</h1>
       {low && (
         <span className="w-fit rounded-full bg-red-100 px-2 py-1 text-xs font-medium text-red-700">
-          Low stock
+          {dict["common.lowStock"]}
         </span>
       )}
 
       <dl className="grid grid-cols-2 gap-2 text-sm">
         <Field label="SKU" value={item.sku} />
-        <Field label="Quantity" value={String(item.quantity)} />
-        <Field label="Location" value={item.location ?? "—"} />
-        <Field label="Category" value={item.category ?? "—"} />
-        <Field label="Cost" value={item.cost !== null ? `$${item.cost.toFixed(2)}` : "—"} />
-        <Field label="Price" value={item.price !== null ? `$${item.price.toFixed(2)}` : "—"} />
-        <Field label="Margin" value={margin !== null ? `$${margin.toFixed(2)}` : "—"} />
+        <Field label={dict["common.quantity"]} value={String(item.quantity)} />
+        <Field label={dict["common.location"]} value={item.location ?? "—"} />
+        <Field label={dict["common.category"]} value={item.category ?? "—"} />
+        <Field
+          label={dict["common.cost"]}
+          value={item.cost !== null ? `$${item.cost.toFixed(2)}` : "—"}
+        />
+        <Field
+          label={dict["common.price"]}
+          value={item.price !== null ? `$${item.price.toFixed(2)}` : "—"}
+        />
+        <Field
+          label={dict["itemDetail.marginLabel"]}
+          value={margin !== null ? `$${margin.toFixed(2)}` : "—"}
+        />
       </dl>
 
       {item.notes && <p className="text-sm text-stone-600">{item.notes}</p>}
@@ -56,7 +67,7 @@ export default async function ItemDetailPage({ params }: { params: { id: string 
           href={`/items/${item.id}/edit`}
           className="flex-1 rounded-lg border border-orange-300 p-3 text-center"
         >
-          Edit
+          {dict["itemDetail.edit"]}
         </Link>
         <DeleteItemButton itemId={item.id} />
       </div>
