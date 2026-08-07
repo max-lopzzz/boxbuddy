@@ -30,7 +30,8 @@ export function ItemCard({ item }: { item: Item }) {
         </p>
       </div>
       {low && (
-        <span className="rounded-full bg-red-100 px-2 py-1 text-xs font-medium text-red-700">
+        <span className="flex items-center gap-1 rounded-full bg-red-100 px-2 py-1 text-xs font-medium text-red-700">
+          <span aria-hidden="true">⚠️</span>
           Low stock
         </span>
       )}

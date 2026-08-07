@@ -8,6 +8,7 @@ import type { Item, ItemInput } from "../lib/types";
 import { apiFetch } from "../lib/api-client";
 import { AutocompleteInput } from "./AutocompleteInput";
 import { BarcodeScanner } from "./BarcodeScanner";
+import { FieldLabel } from "./FieldLabel";
 
 type ItemFormValues = {
   name: string;
@@ -128,17 +129,21 @@ export function ItemForm({ item, prefillCode }: { item?: Item; prefillCode?: str
   return (
     <form onSubmit={handleSubmit} className="mx-auto flex max-w-lg flex-col gap-3 p-4">
       <label className="flex flex-col gap-1">
-        <span className="text-sm text-stone-600">Name</span>
+        <FieldLabel label="Name" hint="The item's name, as you'd want to see it in your inventory list." />
         <input
           required
+          placeholder="e.g. Wireless Mouse"
           value={values.name}
           onChange={(e) => update("name", e.target.value)}
-          className="rounded-lg border border-orange-200 p-2"
+          className="rounded-lg border border-orange-200 p-2 placeholder:text-stone-400"
         />
       </label>
 
       <div className="flex flex-col gap-1">
-        <span className="text-sm text-stone-600">SKU</span>
+        <FieldLabel
+          label="SKU"
+          hint="A barcode that uniquely identifies this item. Scan one, or let the app generate one if it doesn't have one."
+        />
         {skuMode === "scanning" ? (
           <div className="flex flex-col gap-2">
             <BarcodeScanner
@@ -229,74 +234,86 @@ export function ItemForm({ item, prefillCode }: { item?: Item; prefillCode?: str
       </div>
 
       <div className="flex gap-2">
-        <label className="flex flex-1 flex-col gap-1">
-          <span className="text-sm text-stone-600">Quantity</span>
+        <label className="flex min-w-0 flex-1 flex-col gap-1">
+          <FieldLabel label="Quantity" hint="How many of this item you currently have in stock." />
           <input
             type="number"
+            placeholder="0"
             value={values.quantity}
             onChange={(e) => update("quantity", e.target.value)}
-            className="rounded-lg border border-orange-200 p-2"
+            className="w-full min-w-0 rounded-lg border border-orange-200 p-2 placeholder:text-stone-400"
           />
         </label>
-        <label className="flex flex-1 flex-col gap-1">
-          <span className="text-sm text-stone-600">Reorder at</span>
+        <label className="flex min-w-0 flex-1 flex-col gap-1">
+          <FieldLabel
+            label="Reorder at"
+            hint="When quantity drops to this number or below, the item is flagged as low stock."
+          />
           <input
             type="number"
+            placeholder="e.g. 5"
             value={values.reorder_at}
             onChange={(e) => update("reorder_at", e.target.value)}
-            className="rounded-lg border border-orange-200 p-2"
+            className="w-full min-w-0 rounded-lg border border-orange-200 p-2 placeholder:text-stone-400"
           />
         </label>
       </div>
 
       <AutocompleteInput
         label="Location"
+        hint="Where this item is stored, e.g. a shelf or bin name."
+        placeholder="e.g. Shelf A"
         field="location"
         value={values.location}
         onChange={(v) => update("location", v)}
       />
       <AutocompleteInput
         label="Category"
+        hint="A group to help organize similar items together."
+        placeholder="e.g. Office supplies"
         field="category"
         value={values.category}
         onChange={(v) => update("category", v)}
       />
 
       <div className="flex gap-2">
-        <label className="flex flex-1 flex-col gap-1">
-          <span className="text-sm text-stone-600">Cost</span>
+        <label className="flex min-w-0 flex-1 flex-col gap-1">
+          <FieldLabel label="Cost" hint="What you paid for this item, per unit." />
           <input
             type="number"
             step="0.01"
+            placeholder="0.00"
             value={values.cost}
             onChange={(e) => update("cost", e.target.value)}
-            className="rounded-lg border border-orange-200 p-2"
+            className="w-full min-w-0 rounded-lg border border-orange-200 p-2 placeholder:text-stone-400"
           />
         </label>
-        <label className="flex flex-1 flex-col gap-1">
-          <span className="text-sm text-stone-600">Price</span>
+        <label className="flex min-w-0 flex-1 flex-col gap-1">
+          <FieldLabel label="Price" hint="What you sell this item for, per unit." />
           <input
             type="number"
             step="0.01"
+            placeholder="0.00"
             value={values.price}
             onChange={(e) => update("price", e.target.value)}
-            className="rounded-lg border border-orange-200 p-2"
+            className="w-full min-w-0 rounded-lg border border-orange-200 p-2 placeholder:text-stone-400"
           />
         </label>
       </div>
 
       <label className="flex flex-col gap-1">
-        <span className="text-sm text-stone-600">Notes</span>
+        <FieldLabel label="Notes" hint="Anything else worth remembering about this item." />
         <textarea
+          placeholder="Any extra details…"
           value={values.notes}
           onChange={(e) => update("notes", e.target.value)}
-          className="rounded-lg border border-orange-200 p-2"
+          className="rounded-lg border border-orange-200 p-2 placeholder:text-stone-400"
           rows={3}
         />
       </label>
 
       <label className="flex flex-col gap-1">
-        <span className="text-sm text-stone-600">Photo</span>
+        <FieldLabel label="Photo" hint="A picture to help you recognize this item at a glance." />
         <input type="file" accept="image/*" onChange={handlePhotoChange} />
         {photoError && <span className="text-sm text-red-600">{photoError}</span>}
       </label>
