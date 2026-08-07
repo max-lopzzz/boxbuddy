@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { createSupabaseBrowserClient } from "../../lib/supabase/browser";
+import { useTranslation } from "../../lib/i18n/client";
 
 export default function ResetPasswordPage() {
   const [password, setPassword] = useState("");
@@ -12,12 +13,13 @@ export default function ResetPasswordPage() {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const router = useRouter();
+  const { t } = useTranslation();
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
     if (password !== confirmPassword) {
-      setError("Passwords do not match");
+      setError(t("common.passwordsDoNotMatch"));
       return;
     }
     setSubmitting(true);
@@ -38,7 +40,7 @@ export default function ResetPasswordPage() {
       <form onSubmit={handleSubmit} className="flex w-full max-w-xs flex-col gap-3">
         <input
           type="password"
-          placeholder="New password"
+          placeholder={t("resetPassword.newPasswordPlaceholder")}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
@@ -48,7 +50,7 @@ export default function ResetPasswordPage() {
         />
         <input
           type="password"
-          placeholder="Confirm new password"
+          placeholder={t("resetPassword.confirmNewPasswordPlaceholder")}
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
           required
@@ -61,7 +63,7 @@ export default function ResetPasswordPage() {
           disabled={submitting}
           className="rounded-lg bg-orange-400 p-3 font-medium text-white disabled:opacity-50"
         >
-          {submitting ? "Saving..." : "Set new password"}
+          {submitting ? t("common.saving") : t("resetPassword.setNewPassword")}
         </button>
       </form>
     </main>

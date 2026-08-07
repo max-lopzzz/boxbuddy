@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { createSupabaseBrowserClient } from "../../lib/supabase/browser";
+import { useTranslation } from "../../lib/i18n/client";
 
 export default function SignupPage() {
   const [email, setEmail] = useState("");
@@ -14,12 +15,13 @@ export default function SignupPage() {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const router = useRouter();
+  const { t } = useTranslation();
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
     if (password !== confirmPassword) {
-      setError("Passwords do not match");
+      setError(t("common.passwordsDoNotMatch"));
       return;
     }
     setSubmitting(true);
@@ -40,7 +42,7 @@ export default function SignupPage() {
       <form onSubmit={handleSubmit} className="flex w-full max-w-xs flex-col gap-3">
         <input
           type="email"
-          placeholder="Email"
+          placeholder={t("common.email")}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
@@ -49,7 +51,7 @@ export default function SignupPage() {
         />
         <input
           type="password"
-          placeholder="Password"
+          placeholder={t("common.password")}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
@@ -58,7 +60,7 @@ export default function SignupPage() {
         />
         <input
           type="password"
-          placeholder="Confirm password"
+          placeholder={t("signup.confirmPasswordPlaceholder")}
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
           required
@@ -71,10 +73,10 @@ export default function SignupPage() {
           disabled={submitting}
           className="rounded-lg bg-orange-400 p-3 font-medium text-white disabled:opacity-50"
         >
-          {submitting ? "Signing up..." : "Sign up"}
+          {submitting ? t("signup.signingUp") : t("signup.signUp")}
         </button>
         <Link href="/login" className="text-center text-sm text-stone-500 underline">
-          Already have an account? Log in
+          {t("signup.alreadyHaveAccount")}
         </Link>
       </form>
     </main>

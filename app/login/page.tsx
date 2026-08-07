@@ -6,9 +6,11 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { createSupabaseBrowserClient } from "../../lib/supabase/browser";
+import { useTranslation } from "../../lib/i18n/client";
+import type { Locale, TranslationKey } from "../../lib/i18n/types";
 
-const URL_ERROR_MESSAGES: Record<string, string> = {
-  "invalid-or-expired-link": "That link is invalid or has expired. Please request a new one.",
+const URL_ERROR_KEYS: Record<string, TranslationKey> = {
+  "invalid-or-expired-link": "login.invalidOrExpiredLink",
 };
 
 function LoginForm() {
@@ -16,8 +18,9 @@ function LoginForm() {
   const [password, setPassword] = useState("");
   const searchParams = useSearchParams();
   const urlError = searchParams.get("error");
+  const { t, locale, setLocale } = useTranslation();
   const [error, setError] = useState<string | null>(
-    urlError ? URL_ERROR_MESSAGES[urlError] ?? null : null
+    urlError && URL_ERROR_KEYS[urlError] ? t(URL_ERROR_KEYS[urlError]) : null
   );
   const [submitting, setSubmitting] = useState(false);
   const router = useRouter();
@@ -27,11 +30,18 @@ function LoginForm() {
     setSubmitting(true);
     setError(null);
     const supabase = createSupabaseBrowserClient();
-    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error: signInError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
     setSubmitting(false);
     if (signInError) {
       setError(signInError.message);
       return;
+    }
+    const savedLocale = data.user?.user_metadata?.locale;
+    if ((savedLocale === "en" || savedLocale === "es") && savedLocale !== locale) {
+      setLocale(savedLocale as Locale);
     }
     router.push("/");
     router.refresh();
@@ -43,7 +53,7 @@ function LoginForm() {
       <form onSubmit={handleSubmit} className="flex w-full max-w-xs flex-col gap-3">
         <input
           type="email"
-          placeholder="Email"
+          placeholder={t("common.email")}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
@@ -52,7 +62,7 @@ function LoginForm() {
         />
         <input
           type="password"
-          placeholder="Password"
+          placeholder={t("common.password")}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
@@ -64,14 +74,14 @@ function LoginForm() {
           disabled={submitting}
           className="rounded-lg bg-orange-400 p-3 font-medium text-white disabled:opacity-50"
         >
-          {submitting ? "Logging in..." : "Log in"}
+          {submitting ? t("login.loggingIn") : t("login.logIn")}
         </button>
         <div className="flex justify-between text-sm">
           <Link href="/signup" className="text-stone-500 underline">
-            Sign up
+            {t("signup.signUp")}
           </Link>
           <Link href="/forgot-password" className="text-stone-500 underline">
-            Forgot password?
+            {t("login.forgotPasswordLink")}
           </Link>
         </div>
       </form>

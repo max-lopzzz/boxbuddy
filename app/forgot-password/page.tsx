@@ -4,11 +4,13 @@
 import { useState } from "react";
 import Image from "next/image";
 import { createSupabaseBrowserClient } from "../../lib/supabase/browser";
+import { useTranslation } from "../../lib/i18n/client";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const { t } = useTranslation();
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -21,7 +23,7 @@ export default function ForgotPasswordPage() {
     setSubmitting(false);
     // Supabase intentionally never reveals whether the email has an account —
     // always show the same message regardless of the actual result.
-    setMessage("If an account exists for that email, a reset link has been sent.");
+    setMessage(t("forgotPassword.resetLinkSentMessage"));
   }
 
   return (
@@ -30,7 +32,7 @@ export default function ForgotPasswordPage() {
       <form onSubmit={handleSubmit} className="flex w-full max-w-xs flex-col gap-3">
         <input
           type="email"
-          placeholder="Email"
+          placeholder={t("common.email")}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
@@ -43,7 +45,7 @@ export default function ForgotPasswordPage() {
           disabled={submitting}
           className="rounded-lg bg-orange-400 p-3 font-medium text-white disabled:opacity-50"
         >
-          {submitting ? "Sending..." : "Send reset link"}
+          {submitting ? t("forgotPassword.sending") : t("forgotPassword.sendResetLink")}
         </button>
       </form>
     </main>
