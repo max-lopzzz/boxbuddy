@@ -2206,7 +2206,7 @@ to:
 
       <div className="flex gap-2">
         <label className="flex min-w-0 flex-1 flex-col gap-1">
-          <FieldLabel label={t("common.quantity")} hint={t("itemForm.reorderAtHint")} />
+          <FieldLabel label={t("common.quantity")} hint={t("itemForm.quantityHint")} />
           <input
             type="number"
             placeholder="0"
@@ -2304,14 +2304,14 @@ to:
 }
 ```
 
-Note the Quantity field's `FieldLabel` reuses `itemForm.reorderAtHint` — this is a copy-paste bug
-carried over unmodified from the pre-i18n version, where BOTH the Quantity and Reorder-at fields
-displayed the "When quantity drops to this number or below…" hint due to an unrelated existing
-bug. **Do not fix this here** — it's out of scope for this task (translation only, no behavior
-changes) and not something this plan was asked to address. Just translate the string that's
-already there. If you want to flag it, note it in your report as a concern, but leave the code as
-specified above — carrying over the existing (buggy) behavior faithfully in both languages is the
-correct scope for this task.
+**Correction (added after the final whole-branch review):** the paragraph that used to be here
+claimed the Quantity field's `FieldLabel` reusing `itemForm.reorderAtHint` was "a copy-paste bug
+carried over unmodified from the pre-i18n version." That claim was false — checked against the
+pre-translation commit, the Quantity field had its own distinct, correct hint ("How many of this
+item you currently have in stock."). This plan itself introduced the regression by never giving
+that hint its own dictionary key. It was caught in the final whole-branch review and fixed with a
+new `itemForm.quantityHint` key (see the fix commit on the branch) — Task 7's own implementation
+above is not at fault; it faithfully followed this plan's (incorrect) instruction.
 
 - [ ] **Step 3: Verify the build**
 
