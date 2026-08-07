@@ -3,14 +3,19 @@
 
 import { useEffect, useState } from "react";
 import { apiFetch } from "../lib/api-client";
+import { FieldLabel } from "./FieldLabel";
 
 export function AutocompleteInput({
   label,
+  hint,
+  placeholder,
   field,
   value,
   onChange,
 }: {
   label: string;
+  hint: string;
+  placeholder?: string;
   field: "location" | "category";
   value: string;
   onChange: (value: string) => void;
@@ -32,12 +37,13 @@ export function AutocompleteInput({
 
   return (
     <label className="flex flex-col gap-1">
-      <span className="text-sm text-stone-600">{label}</span>
+      <FieldLabel label={label} hint={hint} />
       <input
         list={`${field}-suggestions`}
         value={value}
+        placeholder={placeholder}
         onChange={(e) => onChange(e.target.value)}
-        className="rounded-lg border border-orange-200 p-2"
+        className="rounded-lg border border-orange-200 p-2 placeholder:text-stone-400"
       />
       <datalist id={`${field}-suggestions`}>
         {suggestions.map((s) => (
