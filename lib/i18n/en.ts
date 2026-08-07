@@ -44,6 +44,21 @@ export const en = {
   "settings.languageEnglish": "English",
   "settings.languageSpanish": "Español",
 
+  "subscription.sectionTitle": "Subscription",
+  "subscription.tierFree": "Free",
+  "subscription.tierMonthly": "Monthly",
+  "subscription.tierYearly": "Yearly",
+  "subscription.tierLifetime": "Lifetime",
+  "subscription.unlimitedItems": "Unlimited items",
+  "subscription.upgradeButton": "Upgrade",
+  "subscription.manageSubscriptionLink": "Manage subscription",
+  "subscription.loadFailed": "Couldn't load your subscription info. Try again.",
+  "subscription.loading": "Loading your subscription…",
+  "subscription.paywallError": "Something went wrong showing the upgrade options. Please try again.",
+  "subscription.itemLimitReachedMessage":
+    "You've reached your plan's item limit. Upgrade to add more items.",
+  "subscription.printLabelsUpgradePrompt": "Upgrade to print barcode labels.",
+
   "dashboard.itemsLabel": "Items",
   "dashboard.costValueLabel": "Cost value",
   "dashboard.couldNotLoadInventory": "Couldn't load your inventory. Please try again.",

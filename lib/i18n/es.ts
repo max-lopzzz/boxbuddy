@@ -46,6 +46,22 @@ export const es: Dictionary = {
   "settings.languageEnglish": "English",
   "settings.languageSpanish": "Español",
 
+  "subscription.sectionTitle": "Suscripción",
+  "subscription.tierFree": "Gratis",
+  "subscription.tierMonthly": "Mensual",
+  "subscription.tierYearly": "Anual",
+  "subscription.tierLifetime": "De por vida",
+  "subscription.unlimitedItems": "Artículos ilimitados",
+  "subscription.upgradeButton": "Mejorar plan",
+  "subscription.manageSubscriptionLink": "Administrar suscripción",
+  "subscription.loadFailed": "No se pudo cargar tu información de suscripción. Intenta de nuevo.",
+  "subscription.loading": "Cargando tu suscripción…",
+  "subscription.paywallError":
+    "Algo salió mal al mostrar las opciones de mejora de plan. Intenta de nuevo.",
+  "subscription.itemLimitReachedMessage":
+    "Alcanzaste el límite de artículos de tu plan. Mejora tu plan para agregar más.",
+  "subscription.printLabelsUpgradePrompt": "Mejora tu plan para imprimir etiquetas de código de barras.",
+
   "dashboard.itemsLabel": "Artículos",
   "dashboard.costValueLabel": "Valor de costo",
   "dashboard.couldNotLoadInventory": "No se pudo cargar tu inventario. Por favor intenta de nuevo.",
