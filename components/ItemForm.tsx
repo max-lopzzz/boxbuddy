@@ -9,6 +9,7 @@ import { apiFetch } from "../lib/api-client";
 import { AutocompleteInput } from "./AutocompleteInput";
 import { BarcodeScanner } from "./BarcodeScanner";
 import { FieldLabel } from "./FieldLabel";
+import { useTranslation } from "../lib/i18n/client";
 
 type ItemFormValues = {
   name: string;
@@ -49,6 +50,7 @@ export function ItemForm({ item, prefillCode }: { item?: Item; prefillCode?: str
   const [submitting, setSubmitting] = useState(false);
   const [savedItemState, setSavedItemState] = useState<Item | undefined>(item);
   const router = useRouter();
+  const { t } = useTranslation();
 
   function update<K extends keyof ItemFormValues>(key: K, value: ItemFormValues[K]) {
     setValues((v) => ({ ...v, [key]: value }));
@@ -57,7 +59,7 @@ export function ItemForm({ item, prefillCode }: { item?: Item; prefillCode?: str
   function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0] ?? null;
     if (file && file.size > 5 * 1024 * 1024) {
-      setPhotoError("Photo must be 5MB or smaller.");
+      setPhotoError(t("itemForm.photoTooLarge"));
       setPhotoFile(null);
       return;
     }
@@ -97,7 +99,7 @@ export function ItemForm({ item, prefillCode }: { item?: Item; prefillCode?: str
 
     if (!res.ok) {
       const body = await res.json().catch(() => ({}));
-      setError(body.error ?? "Something went wrong");
+      setError(body.error ?? t("itemForm.somethingWentWrong"));
       setSubmitting(false);
       return;
     }
@@ -115,7 +117,7 @@ export function ItemForm({ item, prefillCode }: { item?: Item; prefillCode?: str
       });
       if (!photoRes.ok) {
         const photoBody = await photoRes.json().catch(() => ({}));
-        setError(photoBody.error ?? "The item saved, but the photo upload failed. You can try again below.");
+        setError(photoBody.error ?? t("itemForm.photoUploadFailed"));
         setSubmitting(false);
         return;
       }
@@ -129,10 +131,10 @@ export function ItemForm({ item, prefillCode }: { item?: Item; prefillCode?: str
   return (
     <form onSubmit={handleSubmit} className="mx-auto flex max-w-lg flex-col gap-3 p-4">
       <label className="flex flex-col gap-1">
-        <FieldLabel label="Name" hint="The item's name, as you'd want to see it in your inventory list." />
+        <FieldLabel label={t("common.name")} hint={t("itemForm.nameHint")} />
         <input
           required
-          placeholder="e.g. Wireless Mouse"
+          placeholder={t("itemForm.namePlaceholder")}
           value={values.name}
           onChange={(e) => update("name", e.target.value)}
           className="rounded-lg border border-orange-200 p-2 placeholder:text-stone-400"
@@ -140,10 +142,7 @@ export function ItemForm({ item, prefillCode }: { item?: Item; prefillCode?: str
       </label>
 
       <div className="flex flex-col gap-1">
-        <FieldLabel
-          label="SKU"
-          hint="A barcode that uniquely identifies this item. Scan one, or let the app generate one if it doesn't have one."
-        />
+        <FieldLabel label="SKU" hint={t("itemForm.skuHint")} />
         {skuMode === "scanning" ? (
           <div className="flex flex-col gap-2">
             <BarcodeScanner
@@ -162,14 +161,9 @@ export function ItemForm({ item, prefillCode }: { item?: Item; prefillCode?: str
               onClick={() => setSkuMode(values.sku ? "filled" : "empty")}
               className="text-sm text-stone-500 underline"
             >
-              Cancel
+              {t("itemForm.cancel")}
             </button>
-            {scanError && (
-              <p className="text-sm text-red-600">
-                Couldn&apos;t access the camera. Try &quot;I don&apos;t have a barcode&quot;
-                instead.
-              </p>
-            )}
+            {scanError && <p className="text-sm text-red-600">{t("itemForm.cameraError")}</p>}
           </div>
         ) : values.sku ? (
           <div className="flex items-center justify-between rounded-lg border border-orange-200 p-2">
@@ -183,7 +177,7 @@ export function ItemForm({ item, prefillCode }: { item?: Item; prefillCode?: str
                 }}
                 className="text-sm text-orange-500 underline"
               >
-                Scan again
+                {t("itemForm.scanAgain")}
               </button>
               {!savedItemState && (
                 <button
@@ -194,7 +188,7 @@ export function ItemForm({ item, prefillCode }: { item?: Item; prefillCode?: str
                   }}
                   className="text-sm text-stone-500 underline"
                 >
-                  Clear
+                  {t("itemForm.clear")}
                 </button>
               )}
             </div>
@@ -203,10 +197,10 @@ export function ItemForm({ item, prefillCode }: { item?: Item; prefillCode?: str
           <div className="flex flex-col gap-2">
             <p className="text-sm text-stone-500">
               {skuMode === "auto"
-                ? "A code will be generated automatically when you save."
+                ? t("itemForm.autoGenerateMessage")
                 : savedItemState
-                  ? "Scan this item's new barcode."
-                  : "Scan this item's barcode, or generate one if it doesn't have one."}
+                  ? t("itemForm.scanNewBarcode")
+                  : t("itemForm.scanOrGenerateMessage")}
             </p>
             <div className="flex gap-2">
               <button
@@ -217,7 +211,7 @@ export function ItemForm({ item, prefillCode }: { item?: Item; prefillCode?: str
                 }}
                 className="flex-1 rounded-lg border border-orange-300 p-2 text-sm text-stone-700"
               >
-                Scan barcode
+                {t("itemForm.scanBarcode")}
               </button>
               {!savedItemState && (
                 <button
@@ -225,7 +219,7 @@ export function ItemForm({ item, prefillCode }: { item?: Item; prefillCode?: str
                   onClick={() => setSkuMode("auto")}
                   className="flex-1 rounded-lg border border-stone-300 p-2 text-sm text-stone-700"
                 >
-                  I don&apos;t have a barcode
+                  {t("itemForm.noBarcode")}
                 </button>
               )}
             </div>
@@ -235,7 +229,7 @@ export function ItemForm({ item, prefillCode }: { item?: Item; prefillCode?: str
 
       <div className="flex gap-2">
         <label className="flex min-w-0 flex-1 flex-col gap-1">
-          <FieldLabel label="Quantity" hint="How many of this item you currently have in stock." />
+          <FieldLabel label={t("common.quantity")} hint={t("itemForm.reorderAtHint")} />
           <input
             type="number"
             placeholder="0"
@@ -245,13 +239,10 @@ export function ItemForm({ item, prefillCode }: { item?: Item; prefillCode?: str
           />
         </label>
         <label className="flex min-w-0 flex-1 flex-col gap-1">
-          <FieldLabel
-            label="Reorder at"
-            hint="When quantity drops to this number or below, the item is flagged as low stock."
-          />
+          <FieldLabel label={t("itemForm.reorderAtLabel")} hint={t("itemForm.reorderAtHint")} />
           <input
             type="number"
-            placeholder="e.g. 5"
+            placeholder={t("itemForm.reorderAtPlaceholder")}
             value={values.reorder_at}
             onChange={(e) => update("reorder_at", e.target.value)}
             className="w-full min-w-0 rounded-lg border border-orange-200 p-2 placeholder:text-stone-400"
@@ -260,17 +251,17 @@ export function ItemForm({ item, prefillCode }: { item?: Item; prefillCode?: str
       </div>
 
       <AutocompleteInput
-        label="Location"
-        hint="Where this item is stored, e.g. a shelf or bin name."
-        placeholder="e.g. Shelf A"
+        label={t("common.location")}
+        hint={t("itemForm.locationHint")}
+        placeholder={t("itemForm.locationPlaceholder")}
         field="location"
         value={values.location}
         onChange={(v) => update("location", v)}
       />
       <AutocompleteInput
-        label="Category"
-        hint="A group to help organize similar items together."
-        placeholder="e.g. Office supplies"
+        label={t("common.category")}
+        hint={t("itemForm.categoryHint")}
+        placeholder={t("itemForm.categoryPlaceholder")}
         field="category"
         value={values.category}
         onChange={(v) => update("category", v)}
@@ -278,7 +269,7 @@ export function ItemForm({ item, prefillCode }: { item?: Item; prefillCode?: str
 
       <div className="flex gap-2">
         <label className="flex min-w-0 flex-1 flex-col gap-1">
-          <FieldLabel label="Cost" hint="What you paid for this item, per unit." />
+          <FieldLabel label={t("common.cost")} hint={t("itemForm.costHint")} />
           <input
             type="number"
             step="0.01"
@@ -289,7 +280,7 @@ export function ItemForm({ item, prefillCode }: { item?: Item; prefillCode?: str
           />
         </label>
         <label className="flex min-w-0 flex-1 flex-col gap-1">
-          <FieldLabel label="Price" hint="What you sell this item for, per unit." />
+          <FieldLabel label={t("common.price")} hint={t("itemForm.priceHint")} />
           <input
             type="number"
             step="0.01"
@@ -302,9 +293,9 @@ export function ItemForm({ item, prefillCode }: { item?: Item; prefillCode?: str
       </div>
 
       <label className="flex flex-col gap-1">
-        <FieldLabel label="Notes" hint="Anything else worth remembering about this item." />
+        <FieldLabel label={t("itemForm.notesLabel")} hint={t("itemForm.notesHint")} />
         <textarea
-          placeholder="Any extra details…"
+          placeholder={t("itemForm.notesPlaceholder")}
           value={values.notes}
           onChange={(e) => update("notes", e.target.value)}
           className="rounded-lg border border-orange-200 p-2 placeholder:text-stone-400"
@@ -313,7 +304,7 @@ export function ItemForm({ item, prefillCode }: { item?: Item; prefillCode?: str
       </label>
 
       <label className="flex flex-col gap-1">
-        <FieldLabel label="Photo" hint="A picture to help you recognize this item at a glance." />
+        <FieldLabel label={t("itemForm.photoLabel")} hint={t("itemForm.photoHint")} />
         <input type="file" accept="image/*" onChange={handlePhotoChange} />
         {photoError && <span className="text-sm text-red-600">{photoError}</span>}
       </label>
@@ -325,7 +316,11 @@ export function ItemForm({ item, prefillCode }: { item?: Item; prefillCode?: str
         disabled={submitting}
         className="rounded-lg bg-orange-400 p-3 font-medium text-white disabled:opacity-50"
       >
-        {submitting ? "Saving…" : savedItemState ? "Save changes" : "Add item"}
+        {submitting
+          ? t("common.saving")
+          : savedItemState
+            ? t("itemForm.saveChanges")
+            : t("dashboard.addItem")}
       </button>
     </form>
   );
