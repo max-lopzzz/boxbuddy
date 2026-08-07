@@ -1,0 +1,115 @@
+// lib/i18n/en.ts
+export const en = {
+  "common.email": "Email",
+  "common.password": "Password",
+  "common.name": "Name",
+  "common.quantity": "Quantity",
+  "common.location": "Location",
+  "common.category": "Category",
+  "common.cost": "Cost",
+  "common.price": "Price",
+  "common.lowStock": "Low stock",
+  "common.saving": "Saving…",
+  "common.passwordsDoNotMatch": "Passwords do not match",
+
+  "login.invalidOrExpiredLink": "That link is invalid or has expired. Please request a new one.",
+  "login.loggingIn": "Logging in…",
+  "login.logIn": "Log in",
+  "login.forgotPasswordLink": "Forgot password?",
+
+  "signup.confirmPasswordPlaceholder": "Confirm password",
+  "signup.signingUp": "Signing up…",
+  "signup.signUp": "Sign up",
+  "signup.alreadyHaveAccount": "Already have an account? Log in",
+
+  "forgotPassword.resetLinkSentMessage":
+    "If an account exists for that email, a reset link has been sent.",
+  "forgotPassword.sending": "Sending…",
+  "forgotPassword.sendResetLink": "Send reset link",
+
+  "resetPassword.newPasswordPlaceholder": "New password",
+  "resetPassword.confirmNewPasswordPlaceholder": "Confirm new password",
+  "resetPassword.setNewPassword": "Set new password",
+
+  "appLayout.settingsLink": "Settings",
+
+  "settings.title": "Settings",
+  "settings.signedInAs": "Signed in as",
+  "settings.newPasswordLabel": "New password",
+  "settings.updatePassword": "Update password",
+  "settings.passwordUpdated": "Password updated.",
+  "settings.logOut": "Log out",
+  "settings.language": "Language",
+  "settings.languageEnglish": "English",
+  "settings.languageSpanish": "Español",
+
+  "dashboard.itemsLabel": "Items",
+  "dashboard.costValueLabel": "Cost value",
+  "dashboard.couldNotLoadInventory": "Couldn't load your inventory. Please try again.",
+  "dashboard.loadingInventory": "Loading your inventory…",
+  "dashboard.noItemsYetTitle": "No items yet",
+  "dashboard.noItemsYetSubtitle": "Add your first item to get started.",
+  "dashboard.addItem": "Add item",
+  "dashboard.noMatchesForPrefix": "No matches for",
+  "dashboard.scanButton": "Scan",
+  "dashboard.searchPlaceholder": "Search by name or SKU",
+
+  "emptyState.greetAlt": "A cat peeking around the corner",
+  "emptyState.noResultsAlt": "A sad cat sitting in an empty box",
+  "emptyState.loadingAlt": "A cat carrying a box",
+
+  "itemForm.nameHint": "The item's name, as you'd want to see it in your inventory list.",
+  "itemForm.namePlaceholder": "e.g. Wireless Mouse",
+  "itemForm.skuHint":
+    "A barcode that uniquely identifies this item. Scan one, or let the app generate one if it doesn't have one.",
+  "itemForm.cancel": "Cancel",
+  "itemForm.cameraError": "Couldn't access the camera. Try \"I don't have a barcode\" instead.",
+  "itemForm.scanAgain": "Scan again",
+  "itemForm.clear": "Clear",
+  "itemForm.autoGenerateMessage": "A code will be generated automatically when you save.",
+  "itemForm.scanNewBarcode": "Scan this item's new barcode.",
+  "itemForm.scanOrGenerateMessage":
+    "Scan this item's barcode, or generate one if it doesn't have one.",
+  "itemForm.scanBarcode": "Scan barcode",
+  "itemForm.noBarcode": "I don't have a barcode",
+  "itemForm.reorderAtLabel": "Reorder at",
+  "itemForm.reorderAtHint":
+    "When quantity drops to this number or below, the item is flagged as low stock.",
+  "itemForm.reorderAtPlaceholder": "e.g. 5",
+  "itemForm.locationHint": "Where this item is stored, e.g. a shelf or bin name.",
+  "itemForm.locationPlaceholder": "e.g. Shelf A",
+  "itemForm.categoryHint": "A group to help organize similar items together.",
+  "itemForm.categoryPlaceholder": "e.g. Office supplies",
+  "itemForm.costHint": "What you paid for this item, per unit.",
+  "itemForm.priceHint": "What you sell this item for, per unit.",
+  "itemForm.notesLabel": "Notes",
+  "itemForm.notesHint": "Anything else worth remembering about this item.",
+  "itemForm.notesPlaceholder": "Any extra details…",
+  "itemForm.photoLabel": "Photo",
+  "itemForm.photoHint": "A picture to help you recognize this item at a glance.",
+  "itemForm.photoTooLarge": "Photo must be 5MB or smaller.",
+  "itemForm.somethingWentWrong": "Something went wrong",
+  "itemForm.photoUploadFailed":
+    "The item saved, but the photo upload failed. You can try again below.",
+  "itemForm.saveChanges": "Save changes",
+
+  "fieldLabel.infoAbout": "Info about",
+
+  "itemDetail.marginLabel": "Margin",
+  "itemDetail.edit": "Edit",
+
+  "deleteItemButton.confirmMessage": "Delete this item? This cannot be undone.",
+  "deleteItemButton.deleteFailed": "Couldn't delete this item. Please try again.",
+  "deleteItemButton.delete": "Delete",
+
+  "barcodePrintLabel.couldNotDraw": "Couldn't draw a barcode for this code.",
+  "barcodePrintLabel.printLabel": "Print label",
+
+  "scan.title": "Scan a code",
+  "scan.cameraFailedManual": "Couldn't access the camera. Enter the code manually below.",
+  "scan.noItemFoundPrefix": "No item found for code",
+  "scan.createNewItemWithCode": "Create new item with this code",
+  "scan.cameraNotWorkingSummary": "Camera not working? Enter the code manually.",
+  "scan.manualCodePlaceholder": "e.g. bb_x7f2a9",
+  "scan.lookUp": "Look up",
+} as const;

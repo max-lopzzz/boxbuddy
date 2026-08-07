@@ -1,0 +1,118 @@
+// lib/i18n/es.ts
+import type { Dictionary } from "./types";
+
+export const es: Dictionary = {
+  "common.email": "Correo electrónico",
+  "common.password": "Contraseña",
+  "common.name": "Nombre",
+  "common.quantity": "Cantidad",
+  "common.location": "Ubicación",
+  "common.category": "Categoría",
+  "common.cost": "Costo",
+  "common.price": "Precio",
+  "common.lowStock": "Stock bajo",
+  "common.saving": "Guardando…",
+  "common.passwordsDoNotMatch": "Las contraseñas no coinciden",
+
+  "login.invalidOrExpiredLink": "Ese enlace no es válido o ha caducado. Por favor solicita uno nuevo.",
+  "login.loggingIn": "Iniciando sesión…",
+  "login.logIn": "Iniciar sesión",
+  "login.forgotPasswordLink": "¿Olvidaste tu contraseña?",
+
+  "signup.confirmPasswordPlaceholder": "Confirmar contraseña",
+  "signup.signingUp": "Registrando…",
+  "signup.signUp": "Registrarse",
+  "signup.alreadyHaveAccount": "¿Ya tienes una cuenta? Inicia sesión",
+
+  "forgotPassword.resetLinkSentMessage":
+    "Si existe una cuenta con ese correo, se ha enviado un enlace para restablecer la contraseña.",
+  "forgotPassword.sending": "Enviando…",
+  "forgotPassword.sendResetLink": "Enviar enlace de restablecimiento",
+
+  "resetPassword.newPasswordPlaceholder": "Nueva contraseña",
+  "resetPassword.confirmNewPasswordPlaceholder": "Confirmar nueva contraseña",
+  "resetPassword.setNewPassword": "Establecer nueva contraseña",
+
+  "appLayout.settingsLink": "Configuración",
+
+  "settings.title": "Configuración",
+  "settings.signedInAs": "Sesión iniciada como",
+  "settings.newPasswordLabel": "Nueva contraseña",
+  "settings.updatePassword": "Actualizar contraseña",
+  "settings.passwordUpdated": "Contraseña actualizada.",
+  "settings.logOut": "Cerrar sesión",
+  "settings.language": "Idioma",
+  "settings.languageEnglish": "English",
+  "settings.languageSpanish": "Español",
+
+  "dashboard.itemsLabel": "Artículos",
+  "dashboard.costValueLabel": "Valor de costo",
+  "dashboard.couldNotLoadInventory": "No se pudo cargar tu inventario. Por favor intenta de nuevo.",
+  "dashboard.loadingInventory": "Cargando tu inventario…",
+  "dashboard.noItemsYetTitle": "Aún no hay artículos",
+  "dashboard.noItemsYetSubtitle": "Agrega tu primer artículo para empezar.",
+  "dashboard.addItem": "Agregar artículo",
+  "dashboard.noMatchesForPrefix": "Sin resultados para",
+  "dashboard.scanButton": "Escanear",
+  "dashboard.searchPlaceholder": "Buscar por nombre o SKU",
+
+  "emptyState.greetAlt": "Un gato mirando por la esquina",
+  "emptyState.noResultsAlt": "Un gato triste sentado en una caja vacía",
+  "emptyState.loadingAlt": "Un gato cargando una caja",
+
+  "itemForm.nameHint": "El nombre del artículo, como quieres verlo en tu lista de inventario.",
+  "itemForm.namePlaceholder": "ej. Mouse inalámbrico",
+  "itemForm.skuHint":
+    "Un código de barras que identifica este artículo de forma única. Escanea uno, o deja que la app genere uno si no tiene.",
+  "itemForm.cancel": "Cancelar",
+  "itemForm.cameraError":
+    "No se pudo acceder a la cámara. Intenta \"No tengo código de barras\" en su lugar.",
+  "itemForm.scanAgain": "Volver a escanear",
+  "itemForm.clear": "Borrar",
+  "itemForm.autoGenerateMessage": "Se generará un código automáticamente al guardar.",
+  "itemForm.scanNewBarcode": "Escanea el nuevo código de barras de este artículo.",
+  "itemForm.scanOrGenerateMessage":
+    "Escanea el código de barras de este artículo, o genera uno si no tiene.",
+  "itemForm.scanBarcode": "Escanear código de barras",
+  "itemForm.noBarcode": "No tengo código de barras",
+  "itemForm.reorderAtLabel": "Reordenar en",
+  "itemForm.reorderAtHint":
+    "Cuando la cantidad baje a este número o menos, el artículo se marca como stock bajo.",
+  "itemForm.reorderAtPlaceholder": "ej. 5",
+  "itemForm.locationHint": "Dónde se guarda este artículo, ej. un estante o contenedor.",
+  "itemForm.locationPlaceholder": "ej. Estante A",
+  "itemForm.categoryHint": "Un grupo para organizar artículos similares.",
+  "itemForm.categoryPlaceholder": "ej. Artículos de oficina",
+  "itemForm.costHint": "Lo que pagaste por este artículo, por unidad.",
+  "itemForm.priceHint": "Por cuánto vendes este artículo, por unidad.",
+  "itemForm.notesLabel": "Notas",
+  "itemForm.notesHint": "Cualquier otra cosa que valga la pena recordar sobre este artículo.",
+  "itemForm.notesPlaceholder": "Cualquier detalle adicional…",
+  "itemForm.photoLabel": "Foto",
+  "itemForm.photoHint": "Una foto para reconocer este artículo de un vistazo.",
+  "itemForm.photoTooLarge": "La foto debe ser de 5MB o menos.",
+  "itemForm.somethingWentWrong": "Algo salió mal",
+  "itemForm.photoUploadFailed":
+    "El artículo se guardó, pero la foto no se pudo subir. Puedes intentarlo de nuevo abajo.",
+  "itemForm.saveChanges": "Guardar cambios",
+
+  "fieldLabel.infoAbout": "Información sobre",
+
+  "itemDetail.marginLabel": "Margen",
+  "itemDetail.edit": "Editar",
+
+  "deleteItemButton.confirmMessage": "¿Eliminar este artículo? Esto no se puede deshacer.",
+  "deleteItemButton.deleteFailed": "No se pudo eliminar este artículo. Por favor intenta de nuevo.",
+  "deleteItemButton.delete": "Eliminar",
+
+  "barcodePrintLabel.couldNotDraw": "No se pudo dibujar un código de barras para este código.",
+  "barcodePrintLabel.printLabel": "Imprimir etiqueta",
+
+  "scan.title": "Escanear un código",
+  "scan.cameraFailedManual": "No se pudo acceder a la cámara. Ingresa el código manualmente abajo.",
+  "scan.noItemFoundPrefix": "No se encontró ningún artículo con el código",
+  "scan.createNewItemWithCode": "Crear nuevo artículo con este código",
+  "scan.cameraNotWorkingSummary": "¿La cámara no funciona? Ingresa el código manualmente.",
+  "scan.manualCodePlaceholder": "ej. bb_x7f2a9",
+  "scan.lookUp": "Buscar",
+};
