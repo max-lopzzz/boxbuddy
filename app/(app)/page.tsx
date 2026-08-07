@@ -26,12 +26,22 @@ export default function DashboardPage() {
   const { t } = useTranslation();
 
   useEffect(() => {
-    setFilters(parseDashboardFilters(window.localStorage.getItem(DASHBOARD_FILTERS_STORAGE_KEY)));
+    let stored: string | null = null;
+    try {
+      stored = window.localStorage.getItem(DASHBOARD_FILTERS_STORAGE_KEY);
+    } catch {
+      stored = null;
+    }
+    setFilters(parseDashboardFilters(stored));
   }, []);
 
   function updateFilters(next: DashboardFilters) {
     setFilters(next);
-    window.localStorage.setItem(DASHBOARD_FILTERS_STORAGE_KEY, JSON.stringify(next));
+    try {
+      window.localStorage.setItem(DASHBOARD_FILTERS_STORAGE_KEY, JSON.stringify(next));
+    } catch {
+      // Persistence is a convenience; ignore write failures (quota, private browsing, etc.).
+    }
   }
 
   const fetchItems = useCallback(

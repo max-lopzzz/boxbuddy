@@ -36,8 +36,14 @@ export function FilterSortPanel({
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const { t } = useTranslation();
-  const categories = dashboardCategoryOptions(items);
-  const isActive = hasActiveDashboardFilters(filters);
+  const categoryOptions = dashboardCategoryOptions(items);
+  const categories =
+    filters.category && !categoryOptions.includes(filters.category)
+      ? [...categoryOptions, filters.category].sort((a, b) => a.localeCompare(b))
+      : categoryOptions;
+  const hasFilters = hasActiveDashboardFilters(filters);
+  const hasNonDefaultSort = filters.sort !== DEFAULT_DASHBOARD_FILTERS.sort;
+  const isActive = hasFilters || hasNonDefaultSort;
 
   function update(partial: Partial<DashboardFilters>) {
     onChange({ ...filters, ...partial });
@@ -139,7 +145,7 @@ export function FilterSortPanel({
             />
           </div>
 
-          {isActive && (
+          {hasFilters && (
             <button
               type="button"
               onClick={clearFilters}
