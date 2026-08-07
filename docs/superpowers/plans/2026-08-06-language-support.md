@@ -184,7 +184,7 @@ export const en = {
   "scan.cameraNotWorkingSummary": "Camera not working? Enter the code manually.",
   "scan.manualCodePlaceholder": "e.g. bb_x7f2a9",
   "scan.lookUp": "Look up",
-} as const;
+};
 ```
 
 - [ ] **Step 4: Create `lib/i18n/es.ts`**
