@@ -11,6 +11,7 @@ export const es: Dictionary = {
   "common.cost": "Costo",
   "common.price": "Precio",
   "common.lowStock": "Stock bajo",
+  "common.qty": "Cant.",
   "common.saving": "Guardando…",
   "common.passwordsDoNotMatch": "Las contraseñas no coinciden",
 
@@ -78,6 +79,7 @@ export const es: Dictionary = {
   "itemForm.reorderAtLabel": "Reordenar en",
   "itemForm.reorderAtHint":
     "Cuando la cantidad baje a este número o menos, el artículo se marca como stock bajo.",
+  "itemForm.quantityHint": "Cuántas unidades de este artículo tienes actualmente en existencia.",
   "itemForm.reorderAtPlaceholder": "ej. 5",
   "itemForm.locationHint": "Dónde se guarda este artículo, ej. un estante o contenedor.",
   "itemForm.locationPlaceholder": "ej. Estante A",
