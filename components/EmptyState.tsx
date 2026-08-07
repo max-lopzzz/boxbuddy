@@ -1,10 +1,20 @@
-import Image from "next/image";
+"use client";
 
-const ILLUSTRATIONS = {
-  greet: { src: "/illustrations/greet.png", alt: "A cat peeking around the corner" },
-  "no-results": { src: "/illustrations/no-results.png", alt: "A sad cat sitting in an empty box" },
-  loading: { src: "/illustrations/loading.png", alt: "A cat carrying a box" },
+import Image from "next/image";
+import { useTranslation } from "../lib/i18n/client";
+import type { TranslationKey } from "../lib/i18n/types";
+
+const ILLUSTRATION_SRC = {
+  greet: "/illustrations/greet.png",
+  "no-results": "/illustrations/no-results.png",
+  loading: "/illustrations/loading.png",
 } as const;
+
+const ILLUSTRATION_ALT_KEY: Record<keyof typeof ILLUSTRATION_SRC, TranslationKey> = {
+  greet: "emptyState.greetAlt",
+  "no-results": "emptyState.noResultsAlt",
+  loading: "emptyState.loadingAlt",
+};
 
 export function EmptyState({
   illustration,
@@ -12,15 +22,20 @@ export function EmptyState({
   subtitle,
   action,
 }: {
-  illustration: keyof typeof ILLUSTRATIONS;
+  illustration: keyof typeof ILLUSTRATION_SRC;
   title: string;
   subtitle?: string;
   action?: React.ReactNode;
 }) {
-  const { src, alt } = ILLUSTRATIONS[illustration];
+  const { t } = useTranslation();
   return (
     <div className="flex flex-col items-center gap-4 p-8 text-center">
-      <Image src={src} alt={alt} width={200} height={200} />
+      <Image
+        src={ILLUSTRATION_SRC[illustration]}
+        alt={t(ILLUSTRATION_ALT_KEY[illustration])}
+        width={200}
+        height={200}
+      />
       <h2 className="text-lg font-semibold text-stone-800">{title}</h2>
       {subtitle && <p className="text-sm text-stone-500">{subtitle}</p>}
       {action}
