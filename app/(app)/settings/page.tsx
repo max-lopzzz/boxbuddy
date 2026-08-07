@@ -5,6 +5,9 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { createSupabaseBrowserClient } from "../../../lib/supabase/browser";
+import { apiFetch } from "../../../lib/api-client";
+import { useTranslation } from "../../../lib/i18n/client";
+import type { Locale } from "../../../lib/i18n/types";
 
 export default function SettingsPage() {
   const [email, setEmail] = useState<string | null>(null);
@@ -12,6 +15,7 @@ export default function SettingsPage() {
   const [message, setMessage] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const router = useRouter();
+  const { locale, t, setLocale } = useTranslation();
 
   useEffect(() => {
     const supabase = createSupabaseBrowserClient();
@@ -27,7 +31,7 @@ export default function SettingsPage() {
     const supabase = createSupabaseBrowserClient();
     const { error } = await supabase.auth.updateUser({ password: newPassword });
     setSubmitting(false);
-    setMessage(error ? error.message : "Password updated.");
+    setMessage(error ? error.message : t("settings.passwordUpdated"));
     if (!error) setNewPassword("");
   }
 
@@ -38,19 +42,28 @@ export default function SettingsPage() {
     router.refresh();
   }
 
+  async function handleLanguageChange(next: Locale) {
+    setLocale(next);
+    await apiFetch("/api/settings/locale", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ locale: next }),
+    });
+  }
+
   return (
     <main className="mx-auto flex max-w-lg flex-col gap-4 p-4">
-      <h1 className="text-xl font-semibold text-stone-800">Settings</h1>
+      <h1 className="text-xl font-semibold text-stone-800">{t("settings.title")}</h1>
 
       {email && (
         <p className="text-sm text-stone-600">
-          Signed in as <span className="font-medium">{email}</span>
+          {t("settings.signedInAs")} <span className="font-medium">{email}</span>
         </p>
       )}
 
       <form onSubmit={handleChangePassword} className="flex flex-col gap-2">
         <label className="flex flex-col gap-1">
-          <span className="text-sm text-stone-600">New password</span>
+          <span className="text-sm text-stone-600">{t("settings.newPasswordLabel")}</span>
           <input
             type="password"
             value={newPassword}
@@ -66,15 +79,43 @@ export default function SettingsPage() {
           disabled={submitting}
           className="rounded-lg bg-orange-400 p-3 text-white disabled:opacity-50"
         >
-          {submitting ? "Saving..." : "Update password"}
+          {submitting ? t("common.saving") : t("settings.updatePassword")}
         </button>
       </form>
+
+      <div className="flex flex-col gap-2">
+        <span className="text-sm text-stone-600">{t("settings.language")}</span>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={() => handleLanguageChange("en")}
+            className={`flex-1 rounded-lg border p-2 text-sm ${
+              locale === "en"
+                ? "border-orange-400 bg-orange-50 text-stone-800"
+                : "border-stone-300 text-stone-600"
+            }`}
+          >
+            {t("settings.languageEnglish")}
+          </button>
+          <button
+            type="button"
+            onClick={() => handleLanguageChange("es")}
+            className={`flex-1 rounded-lg border p-2 text-sm ${
+              locale === "es"
+                ? "border-orange-400 bg-orange-50 text-stone-800"
+                : "border-stone-300 text-stone-600"
+            }`}
+          >
+            {t("settings.languageSpanish")}
+          </button>
+        </div>
+      </div>
 
       <button
         onClick={handleLogout}
         className="rounded-lg border border-stone-300 p-3 text-stone-600"
       >
-        Log out
+        {t("settings.logOut")}
       </button>
 
       <div className="mt-6 flex justify-center">
