@@ -85,7 +85,7 @@ so a user with many items can find and organize what they're looking for.
     `sort` alone.
 - **Empty state**: if `items` is non-empty but `visibleItems` is empty (filters excluded
   everything), render the existing `no-results` `EmptyState` illustration with a new message
-  (`dashboard.noFilterMatches`), distinct from the existing search-no-match message
+  (`dashboard.noFilterMatchesTitle`), distinct from the existing search-no-match message
   (`dashboard.noMatchesForPrefix`) which is reserved for an empty *search* result.
 - **i18n**: new keys added to both `lib/i18n/en.ts` and `lib/i18n/es.ts` following the
   existing flat-key pattern — button label, each sort option's label, "Category"/"All
