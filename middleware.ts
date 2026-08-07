@@ -1,5 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { LOCALE_COOKIE } from "./lib/i18n/constants";
+import { detectLocaleFromAcceptLanguage } from "./lib/i18n/detect";
 
 export async function middleware(request: NextRequest) {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -35,6 +37,13 @@ export async function middleware(request: NextRequest) {
   // Refreshes the session (rewriting cookies if the access token was renewed) so
   // Server Components downstream always see a current session.
   await supabase.auth.getUser();
+
+  // Auto-detect the visitor's language on their first visit only — once the cookie
+  // exists (from detection or an explicit choice in Settings), never overwrite it here.
+  if (!request.cookies.get(LOCALE_COOKIE)) {
+    const locale = detectLocaleFromAcceptLanguage(request.headers.get("accept-language"));
+    response.cookies.set(LOCALE_COOKIE, locale, { path: "/", maxAge: 60 * 60 * 24 * 365 });
+  }
 
   return response;
 }
