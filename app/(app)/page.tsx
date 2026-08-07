@@ -1,20 +1,38 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { ItemCard } from "../../components/ItemCard";
 import { SearchBar } from "../../components/SearchBar";
 import { EmptyState } from "../../components/EmptyState";
+import { FilterSortPanel } from "../../components/FilterSortPanel";
 import { isLowStock } from "../../lib/item-helpers";
 import { apiFetch } from "../../lib/api-client";
 import { useTranslation } from "../../lib/i18n/client";
+import {
+  applyDashboardFilters,
+  DASHBOARD_FILTERS_STORAGE_KEY,
+  DEFAULT_DASHBOARD_FILTERS,
+  parseDashboardFilters,
+  type DashboardFilters,
+} from "../../lib/dashboard-filters";
 import type { Item } from "../../lib/types";
 
 export default function DashboardPage() {
   const [items, setItems] = useState<Item[] | null>(null);
   const [search, setSearch] = useState("");
   const [fetchError, setFetchError] = useState<string | null>(null);
+  const [filters, setFilters] = useState<DashboardFilters>(DEFAULT_DASHBOARD_FILTERS);
   const { t } = useTranslation();
+
+  useEffect(() => {
+    setFilters(parseDashboardFilters(window.localStorage.getItem(DASHBOARD_FILTERS_STORAGE_KEY)));
+  }, []);
+
+  function updateFilters(next: DashboardFilters) {
+    setFilters(next);
+    window.localStorage.setItem(DASHBOARD_FILTERS_STORAGE_KEY, JSON.stringify(next));
+  }
 
   const fetchItems = useCallback(
     async (query: string) => {
@@ -42,6 +60,11 @@ export default function DashboardPage() {
     fetchItems(search);
   }, [search, fetchItems]);
 
+  const visibleItems = useMemo(
+    () => (items ? applyDashboardFilters(items, filters) : null),
+    [items, filters]
+  );
+
   const totalCostValue = items?.reduce((sum, i) => sum + (i.cost ?? 0) * i.quantity, 0) ?? 0;
   const lowStockCount = items?.filter((i) => isLowStock(i.quantity, i.reorder_at)).length ?? 0;
 
@@ -57,7 +80,12 @@ export default function DashboardPage() {
         <SummaryCard label={t("common.lowStock")} value={lowStockCount} />
       </div>
 
-      <SearchBar onSearch={setSearch} />
+      <div className="flex flex-wrap items-center gap-2">
+        <div className="min-w-0 flex-1">
+          <SearchBar onSearch={setSearch} />
+        </div>
+        <FilterSortPanel items={items ?? []} filters={filters} onChange={updateFilters} />
+      </div>
 
       {items === null && (
         <EmptyState illustration="loading" title={t("dashboard.loadingInventory")} />
@@ -83,9 +111,13 @@ export default function DashboardPage() {
         />
       )}
 
-      {items !== null && items.length > 0 && (
+      {items !== null && items.length > 0 && visibleItems && visibleItems.length === 0 && (
+        <EmptyState illustration="no-results" title={t("dashboard.noFilterMatchesTitle")} />
+      )}
+
+      {visibleItems !== null && visibleItems.length > 0 && (
         <div className="flex flex-col gap-2">
-          {items.map((item) => (
+          {visibleItems.map((item) => (
             <ItemCard key={item.id} item={item} />
           ))}
         </div>
