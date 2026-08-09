@@ -71,6 +71,35 @@ inventory — no user can see, edit, or delete another account's items.
 4. `npm install`
 5. `npm run dev`, then visit `http://localhost:3000`.
 
+## RevenueCat subscriptions (BoxBuddy Pro)
+
+BoxBuddy Pro is a three-tier subscription (Monthly/Yearly/Lifetime) via
+[RevenueCat](https://www.revenuecat.com/)'s Web SDK. None of the following is doable from
+code — it must be set up once in the RevenueCat dashboard before the feature works:
+
+1. Create three products with these exact identifiers: `monthly`, `yearly`, `lifetime`.
+2. Create an entitlement with the exact identifier `BoxBuddy Pro`, attached to all three
+   products.
+3. Create one Offering (e.g. `default`) containing all three as packages, and mark it
+   "current".
+4. Connect a payment provider (Stripe, Paddle, or RevenueCat Billing) to enable checkout.
+5. Generate a **Secret** API key with subscriber-read access — this is
+   `REVENUECAT_SECRET_API_KEY` below, separate from the publishable key.
+6. Add both keys to `.env.local`:
+   - `NEXT_PUBLIC_REVENUECAT_API_KEY` — the publishable Web Billing key. Safe for client
+     exposure by RevenueCat's own design.
+   - `REVENUECAT_SECRET_API_KEY` — server-only, used by `lib/subscription.ts`'s REST calls
+     to authoritatively resolve a user's tier. Never expose this to the browser.
+
+A `test_`-prefixed publishable key implies RevenueCat's sandbox mode — the full paywall and
+purchase flow can be verified end to end without a real payment.
+
+**Tier rules** (`TIER_RULES` in `lib/subscription.ts`): free = 50 items, no label printing;
+Monthly/Yearly = 500 items, label printing enabled; Lifetime = unlimited items, label
+printing enabled. If a user's item count already exceeds their tier's limit (e.g. after a
+downgrade), existing items are never hidden or deleted — only creating additional items is
+blocked.
+
 ## Testing
 
 `npm test` runs all unit tests (via Vitest). Integration tests that touch Supabase

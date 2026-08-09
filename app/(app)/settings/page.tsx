@@ -7,21 +7,54 @@ import { useRouter } from "next/navigation";
 import { createSupabaseBrowserClient } from "../../../lib/supabase/browser";
 import { apiFetch } from "../../../lib/api-client";
 import { useTranslation } from "../../../lib/i18n/client";
+import { UpgradeButton } from "../../../components/UpgradeButton";
 import type { Locale } from "../../../lib/i18n/types";
+import type { TranslationKey } from "../../../lib/i18n/types";
+import type { SubscriptionTier } from "../../../lib/subscription";
+
+type SubscriptionSummary = {
+  tier: SubscriptionTier;
+  itemLimit: number | null;
+  canPrintLabels: boolean;
+  managementURL: string | null;
+  itemCount: number;
+};
+
+const TIER_LABEL_KEYS: Record<SubscriptionTier, TranslationKey> = {
+  free: "subscription.tierFree",
+  monthly: "subscription.tierMonthly",
+  yearly: "subscription.tierYearly",
+  lifetime: "subscription.tierLifetime",
+};
 
 export default function SettingsPage() {
   const [email, setEmail] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
   const [newPassword, setNewPassword] = useState("");
   const [message, setMessage] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [subscription, setSubscription] = useState<SubscriptionSummary | null>(null);
+  const [subscriptionError, setSubscriptionError] = useState(false);
   const router = useRouter();
   const { locale, t, setLocale } = useTranslation();
+
+  async function fetchSubscription() {
+    setSubscriptionError(false);
+    const res = await apiFetch("/api/subscription");
+    if (!res.ok) {
+      setSubscriptionError(true);
+      return;
+    }
+    setSubscription(await res.json());
+  }
 
   useEffect(() => {
     const supabase = createSupabaseBrowserClient();
     supabase.auth.getUser().then(({ data }) => {
       setEmail(data.user?.email ?? null);
+      setUserId(data.user?.id ?? null);
     });
+    fetchSubscription();
   }, []);
 
   async function handleChangePassword(e: React.FormEvent) {
@@ -110,6 +143,37 @@ export default function SettingsPage() {
             {t("settings.languageSpanish")}
           </button>
         </div>
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <span className="text-sm text-stone-600">{t("subscription.sectionTitle")}</span>
+        {subscriptionError ? (
+          <p className="text-sm text-red-600">{t("subscription.loadFailed")}</p>
+        ) : subscription ? (
+          <>
+            <p className="text-sm text-stone-600">
+              {t(TIER_LABEL_KEYS[subscription.tier])} —{" "}
+              {subscription.itemLimit === null
+                ? t("subscription.unlimitedItems")
+                : `${subscription.itemCount} / ${subscription.itemLimit} ${t("dashboard.itemsLabel")}`}
+            </p>
+            {subscription.tier !== "lifetime" && userId && (
+              <UpgradeButton appUserId={userId} onSuccess={fetchSubscription} />
+            )}
+            {subscription.managementURL && (
+              <a
+                href={subscription.managementURL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-orange-500 underline"
+              >
+                {t("subscription.manageSubscriptionLink")}
+              </a>
+            )}
+          </>
+        ) : (
+          <p className="text-sm text-stone-500">{t("subscription.loading")}</p>
+        )}
       </div>
 
       <button

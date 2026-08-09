@@ -1,14 +1,16 @@
 // components/ItemForm.tsx
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Html5QrcodeSupportedFormats } from "html5-qrcode";
 import type { Item, ItemInput } from "../lib/types";
 import { apiFetch } from "../lib/api-client";
+import { createSupabaseBrowserClient } from "../lib/supabase/browser";
 import { AutocompleteInput } from "./AutocompleteInput";
 import { BarcodeScanner } from "./BarcodeScanner";
 import { FieldLabel } from "./FieldLabel";
+import { UpgradeButton } from "./UpgradeButton";
 import { useTranslation } from "../lib/i18n/client";
 
 type ItemFormValues = {
@@ -47,10 +49,17 @@ export function ItemForm({ item, prefillCode }: { item?: Item; prefillCode?: str
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoError, setPhotoError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [itemLimitReached, setItemLimitReached] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [savedItemState, setSavedItemState] = useState<Item | undefined>(item);
+  const [userId, setUserId] = useState<string | null>(null);
   const router = useRouter();
   const { t } = useTranslation();
+
+  useEffect(() => {
+    const supabase = createSupabaseBrowserClient();
+    supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
+  }, []);
 
   function update<K extends keyof ItemFormValues>(key: K, value: ItemFormValues[K]) {
     setValues((v) => ({ ...v, [key]: value }));
@@ -76,6 +85,7 @@ export function ItemForm({ item, prefillCode }: { item?: Item; prefillCode?: str
     e.preventDefault();
     setSubmitting(true);
     setError(null);
+    setItemLimitReached(false);
 
     const payload: ItemInput = {
       name: values.name,
@@ -99,6 +109,11 @@ export function ItemForm({ item, prefillCode }: { item?: Item; prefillCode?: str
 
     if (!res.ok) {
       const body = await res.json().catch(() => ({}));
+      if (body.code === "item_limit_reached") {
+        setItemLimitReached(true);
+        setSubmitting(false);
+        return;
+      }
       setError(body.error ?? t("itemForm.somethingWentWrong"));
       setSubmitting(false);
       return;
@@ -310,6 +325,13 @@ export function ItemForm({ item, prefillCode }: { item?: Item; prefillCode?: str
       </label>
 
       {error && <p className="text-sm text-red-600">{error}</p>}
+
+      {itemLimitReached && userId && (
+        <div className="flex flex-col gap-2 rounded-lg border border-orange-200 bg-orange-50 p-3">
+          <p className="text-sm text-stone-700">{t("subscription.itemLimitReachedMessage")}</p>
+          <UpgradeButton appUserId={userId} onSuccess={() => setItemLimitReached(false)} />
+        </div>
+      )}
 
       <button
         type="submit"
