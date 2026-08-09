@@ -40,12 +40,16 @@ export default function SettingsPage() {
 
   async function fetchSubscription() {
     setSubscriptionError(false);
-    const res = await apiFetch("/api/subscription");
-    if (!res.ok) {
+    try {
+      const res = await apiFetch("/api/subscription");
+      if (!res.ok) {
+        setSubscriptionError(true);
+        return;
+      }
+      setSubscription(await res.json());
+    } catch {
       setSubscriptionError(true);
-      return;
     }
-    setSubscription(await res.json());
   }
 
   useEffect(() => {

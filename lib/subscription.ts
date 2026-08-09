@@ -51,8 +51,9 @@ export function parseSubscriberResponse(json: unknown): SubscriptionStatus {
 
   const e = entry as Record<string, unknown>;
   const expiresDate = e.expires_date;
-  const isExpired =
-    typeof expiresDate === "string" && new Date(expiresDate).getTime() <= Date.now();
+  const isNonExpiring = expiresDate === null;
+  const expiryMs = typeof expiresDate === "string" ? new Date(expiresDate).getTime() : NaN;
+  const isExpired = !isNonExpiring && (Number.isNaN(expiryMs) || expiryMs <= Date.now());
   if (isExpired) {
     return { ...FREE_TIER_STATUS, managementURL };
   }
@@ -72,6 +73,7 @@ export async function getSubscriptionStatus(userId: string): Promise<Subscriptio
   try {
     const res = await fetch(`https://api.revenuecat.com/v1/subscribers/${userId}`, {
       headers: { Authorization: `Bearer ${secretKey}` },
+      signal: AbortSignal.timeout(3000),
     });
     if (!res.ok) {
       console.error(`RevenueCat subscriber lookup failed with status ${res.status}`);

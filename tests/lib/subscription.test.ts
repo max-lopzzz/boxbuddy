@@ -93,6 +93,33 @@ describe("parseSubscriberResponse", () => {
     expect(parseSubscriberResponse({})).toEqual(FREE_TIER_STATUS);
     expect(parseSubscriberResponse({ subscriber: null })).toEqual(FREE_TIER_STATUS);
   });
+
+  it("falls back to free when expires_date is not a valid date string", () => {
+    const result = parseSubscriberResponse(
+      subscriberJson({ expires_date: "not-a-date", product_identifier: "monthly" })
+    );
+    expect(result.tier).toBe("free");
+  });
+
+  it("falls back to free when expires_date is a number instead of a string", () => {
+    const result = parseSubscriberResponse(
+      subscriberJson({ expires_date: 1893456000000 as any, product_identifier: "monthly" })
+    );
+    expect(result.tier).toBe("free");
+  });
+
+  it("falls back to free when expires_date is missing entirely", () => {
+    const entry = {
+      subscriber: {
+        management_url: null,
+        entitlements: {
+          "BoxBuddy Pro": { product_identifier: "monthly", purchase_date: "2026-01-01T00:00:00Z" },
+        },
+      },
+    };
+    const result = parseSubscriberResponse(entry);
+    expect(result.tier).toBe("free");
+  });
 });
 
 describe("getSubscriptionStatus", () => {
@@ -143,7 +170,10 @@ describe("getSubscriptionStatus", () => {
 
     expect(fetchSpy).toHaveBeenCalledWith(
       "https://api.revenuecat.com/v1/subscribers/user-abc",
-      { headers: { Authorization: "Bearer sk_test_123" } }
+      {
+        headers: { Authorization: "Bearer sk_test_123" },
+        signal: expect.any(AbortSignal),
+      }
     );
     expect(result.tier).toBe("lifetime");
   });
