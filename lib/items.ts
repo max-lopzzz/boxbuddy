@@ -97,6 +97,10 @@ export async function getItemCount(ownerId: string): Promise<number> {
   return count ?? 0;
 }
 
+export function isAtItemLimit(count: number, itemLimit: number | null): boolean {
+  return itemLimit !== null && count >= itemLimit;
+}
+
 export async function getItem(ownerId: string, id: string): Promise<Item | null> {
   const supabase = getSupabaseClient();
   const { data, error } = await supabase

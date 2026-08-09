@@ -1,7 +1,15 @@
 // app/api/items/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUserId } from "../../../lib/auth";
-import { listItems, createItem, parseItemInput, InvalidItemInputError } from "../../../lib/items";
+import {
+  listItems,
+  createItem,
+  parseItemInput,
+  InvalidItemInputError,
+  getItemCount,
+  isAtItemLimit,
+} from "../../../lib/items";
+import { getSubscriptionStatus } from "../../../lib/subscription";
 
 export async function GET(request: NextRequest) {
   const userId = await getCurrentUserId();
@@ -27,6 +35,22 @@ export async function POST(request: NextRequest) {
     }
     throw error;
   }
+
+  const [status, itemCount] = await Promise.all([
+    getSubscriptionStatus(userId),
+    getItemCount(userId),
+  ]);
+  if (isAtItemLimit(itemCount, status.itemLimit)) {
+    return NextResponse.json(
+      {
+        error: "You've reached your plan's item limit.",
+        code: "item_limit_reached",
+        itemLimit: status.itemLimit,
+      },
+      { status: 402 }
+    );
+  }
+
   try {
     const item = await createItem(userId, input);
     return NextResponse.json({ item }, { status: 201 });
