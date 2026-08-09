@@ -27,6 +27,7 @@ export function UpgradeButton({
       if (err instanceof PurchasesError && err.errorCode === ErrorCode.UserCancelledError) {
         return;
       }
+      console.error("RevenueCat presentPaywall failed:", err);
       setError(true);
     }
   }
