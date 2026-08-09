@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { getCurrentUserId } from "../../../../lib/auth";
 import { getItem } from "../../../../lib/items";
+import { getSubscriptionStatus } from "../../../../lib/subscription";
 import { renderBarcodeSvg } from "../../../../lib/barcode";
 import { computeMargin, isLowStock } from "../../../../lib/item-helpers";
 import { getLocale, getDictionary } from "../../../../lib/i18n/server";
@@ -20,6 +21,7 @@ export default async function ItemDetailPage({ params }: { params: { id: string 
   const low = isLowStock(item.quantity, item.reorder_at);
   const barcodeSvg = renderBarcodeSvg(item.sku);
   const dict = getDictionary(getLocale());
+  const subscription = await getSubscriptionStatus(userId);
 
   return (
     <main className="mx-auto flex max-w-lg flex-col gap-4 p-4">
@@ -60,7 +62,13 @@ export default async function ItemDetailPage({ params }: { params: { id: string 
 
       {item.notes && <p className="text-sm text-stone-600">{item.notes}</p>}
 
-      <BarcodePrintLabel svg={barcodeSvg} name={item.name} sku={item.sku} />
+      {subscription.canPrintLabels ? (
+        <BarcodePrintLabel svg={barcodeSvg} name={item.name} sku={item.sku} />
+      ) : (
+        <p className="rounded-xl border border-dashed border-stone-300 p-4 text-center text-sm text-stone-500">
+          {dict["subscription.printLabelsUpgradePrompt"]}
+        </p>
+      )}
 
       <div className="flex gap-2">
         <Link
