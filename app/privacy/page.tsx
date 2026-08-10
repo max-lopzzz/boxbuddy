@@ -4,9 +4,10 @@ import type { Locale } from "../../lib/i18n/types";
 
 type Section = { heading: string; body: string };
 
-const content: Record<Locale, { title: string; sections: Section[] }> = {
+const content: Record<Locale, { title: string; lastUpdated: string; sections: Section[] }> = {
   en: {
     title: "Privacy Policy",
+    lastUpdated: "Last updated: August 10, 2026",
     sections: [
       {
         heading: "Overview",
@@ -14,7 +15,7 @@ const content: Record<Locale, { title: string; sections: Section[] }> = {
       },
       {
         heading: "Information We Collect",
-        body: "When you create a BoxBuddy account, we collect your email address and password (managed securely by Supabase Auth — we never see your password in plain text). As you use the app, we store the inventory data you enter: item names, quantities, locations, categories, costs, prices, notes, and any photos you upload. If you subscribe to BoxBuddy Pro, RevenueCat and Stripe process your payment and subscription information; BoxBuddy itself never sees or stores your payment card details.",
+        body: "When you create a BoxBuddy account, we collect your email address and password (managed securely by Supabase Auth — we never see your password in plain text). As you use the app, we store the inventory data you enter: item names, quantities, SKU/barcode, low-stock reorder threshold, locations, categories, costs, prices, notes, and any photos you upload. If you subscribe to BoxBuddy Pro, RevenueCat and Stripe process your payment and subscription information; BoxBuddy itself never sees or stores your payment card details.",
       },
       {
         heading: "How We Use Your Information",
@@ -22,7 +23,7 @@ const content: Record<Locale, { title: string; sections: Section[] }> = {
       },
       {
         heading: "Third-Party Services",
-        body: "BoxBuddy relies on three third-party services to operate: Supabase (authentication and database hosting), RevenueCat (subscription management), and Stripe (payment processing). Each of these providers has its own privacy policy governing how they handle your data.",
+        body: "BoxBuddy relies on four third-party services to operate: Supabase (authentication and database hosting), RevenueCat (subscription management), Stripe (payment processing), and Vercel (application hosting). Each of these providers has its own privacy policy governing how they handle your data.",
       },
       {
         heading: "Data Retention",
@@ -52,6 +53,7 @@ const content: Record<Locale, { title: string; sections: Section[] }> = {
   },
   es: {
     title: "Política de Privacidad",
+    lastUpdated: "Última actualización: 10 de agosto de 2026",
     sections: [
       {
         heading: "Resumen",
@@ -59,7 +61,7 @@ const content: Record<Locale, { title: string; sections: Section[] }> = {
       },
       {
         heading: "Información que recopilamos",
-        body: "Cuando creas una cuenta de BoxBuddy, recopilamos tu correo electrónico y contraseña (gestionados de forma segura por Supabase Auth — nunca vemos tu contraseña en texto plano). Mientras usas la app, almacenamos los datos de inventario que ingresas: nombres de artículos, cantidades, ubicaciones, categorías, costos, precios, notas y cualquier foto que subas. Si te suscribes a BoxBuddy Pro, RevenueCat y Stripe procesan tu información de pago y suscripción; BoxBuddy nunca ve ni almacena los datos de tu tarjeta de pago.",
+        body: "Cuando creas una cuenta de BoxBuddy, recopilamos tu correo electrónico y contraseña (gestionados de forma segura por Supabase Auth — nunca vemos tu contraseña en texto plano). Mientras usas la app, almacenamos los datos de inventario que ingresas: nombres de artículos, cantidades, SKU o código de barras, umbral de reorden de stock bajo, ubicaciones, categorías, costos, precios, notas y cualquier foto que subas. Si te suscribes a BoxBuddy Pro, RevenueCat y Stripe procesan tu información de pago y suscripción; BoxBuddy nunca ve ni almacena los datos de tu tarjeta de pago.",
       },
       {
         heading: "Cómo usamos tu información",
@@ -67,7 +69,7 @@ const content: Record<Locale, { title: string; sections: Section[] }> = {
       },
       {
         heading: "Servicios de terceros",
-        body: "BoxBuddy depende de tres servicios de terceros para funcionar: Supabase (autenticación y alojamiento de base de datos), RevenueCat (gestión de suscripciones) y Stripe (procesamiento de pagos). Cada uno de estos proveedores tiene su propia política de privacidad que rige cómo manejan tus datos.",
+        body: "BoxBuddy depende de cuatro servicios de terceros para funcionar: Supabase (autenticación y alojamiento de base de datos), RevenueCat (gestión de suscripciones), Stripe (procesamiento de pagos) y Vercel (alojamiento de la aplicación). Cada uno de estos proveedores tiene su propia política de privacidad que rige cómo manejan tus datos.",
       },
       {
         heading: "Retención de datos",
@@ -99,10 +101,11 @@ const content: Record<Locale, { title: string; sections: Section[] }> = {
 
 export default function PrivacyPage() {
   const locale = getLocale();
-  const { title, sections } = content[locale];
+  const { title, lastUpdated, sections } = content[locale];
   return (
     <main className="mx-auto flex max-w-lg flex-col gap-4 p-6">
       <h1 className="text-xl font-semibold text-stone-800">{title}</h1>
+      <p className="text-xs text-stone-400">{lastUpdated}</p>
       {sections.map((section) => (
         <section key={section.heading} className="flex flex-col gap-1">
           <h2 className="text-sm font-semibold text-stone-800">{section.heading}</h2>

@@ -4,9 +4,10 @@ import type { Locale } from "../../lib/i18n/types";
 
 type Section = { heading: string; body: string };
 
-const content: Record<Locale, { title: string; sections: Section[] }> = {
+const content: Record<Locale, { title: string; lastUpdated: string; sections: Section[] }> = {
   en: {
     title: "Terms of Service",
+    lastUpdated: "Last updated: August 10, 2026",
     sections: [
       {
         heading: "Acceptance of Terms",
@@ -18,7 +19,7 @@ const content: Record<Locale, { title: string; sections: Section[] }> = {
       },
       {
         heading: "Subscriptions and Billing",
-        body: "BoxBuddy offers a free tier (up to 50 items) and paid BoxBuddy Pro tiers (Monthly, Yearly, and Lifetime) with higher or unlimited item limits and barcode label printing. Paid subscriptions are billed and processed through RevenueCat and Stripe, and renew automatically until cancelled. You can manage or cancel your subscription at any time from the Settings page in the app. We do not offer refunds for partial billing periods, except where required by law.",
+        body: "BoxBuddy offers a free tier (up to 50 items) and paid BoxBuddy Pro tiers (Monthly, Yearly, and Lifetime) with higher or unlimited item limits and barcode label printing. Paid subscriptions are billed and processed through RevenueCat and Stripe, and renew automatically until cancelled. You can manage or cancel your subscription at any time from the Settings page in the app, or by emailing m.lopz.montn@gmail.com. We do not offer refunds for partial billing periods, except where required by law.",
       },
       {
         heading: "Acceptable Use",
@@ -52,6 +53,7 @@ const content: Record<Locale, { title: string; sections: Section[] }> = {
   },
   es: {
     title: "Términos de Servicio",
+    lastUpdated: "Última actualización: 10 de agosto de 2026",
     sections: [
       {
         heading: "Aceptación de los términos",
@@ -63,7 +65,7 @@ const content: Record<Locale, { title: string; sections: Section[] }> = {
       },
       {
         heading: "Suscripciones y facturación",
-        body: "BoxBuddy ofrece un plan gratuito (hasta 50 artículos) y planes pagados BoxBuddy Pro (Mensual, Anual y De por vida) con límites de artículos más altos o ilimitados e impresión de etiquetas de código de barras. Las suscripciones pagadas se facturan y procesan a través de RevenueCat y Stripe, y se renuevan automáticamente hasta que se cancelen. Puedes administrar o cancelar tu suscripción en cualquier momento desde la página de Configuración en la app. No ofrecemos reembolsos por períodos de facturación parciales, excepto cuando lo exija la ley.",
+        body: "BoxBuddy ofrece un plan gratuito (hasta 50 artículos) y planes pagados BoxBuddy Pro (Mensual, Anual y De por vida) con límites de artículos más altos o ilimitados e impresión de etiquetas de código de barras. Las suscripciones pagadas se facturan y procesan a través de RevenueCat y Stripe, y se renuevan automáticamente hasta que se cancelen. Puedes administrar o cancelar tu suscripción en cualquier momento desde la página de Configuración en la app, o escribiendo a m.lopz.montn@gmail.com. No ofrecemos reembolsos por períodos de facturación parciales, excepto cuando lo exija la ley.",
       },
       {
         heading: "Uso aceptable",
@@ -99,10 +101,11 @@ const content: Record<Locale, { title: string; sections: Section[] }> = {
 
 export default function TermsPage() {
   const locale = getLocale();
-  const { title, sections } = content[locale];
+  const { title, lastUpdated, sections } = content[locale];
   return (
     <main className="mx-auto flex max-w-lg flex-col gap-4 p-6">
       <h1 className="text-xl font-semibold text-stone-800">{title}</h1>
+      <p className="text-xs text-stone-400">{lastUpdated}</p>
       {sections.map((section) => (
         <section key={section.heading} className="flex flex-col gap-1">
           <h2 className="text-sm font-semibold text-stone-800">{section.heading}</h2>
