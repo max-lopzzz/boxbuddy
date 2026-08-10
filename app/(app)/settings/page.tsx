@@ -3,6 +3,7 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createSupabaseBrowserClient } from "../../../lib/supabase/browser";
 import { apiFetch } from "../../../lib/api-client";
@@ -186,6 +187,18 @@ export default function SettingsPage() {
       >
         {t("settings.logOut")}
       </button>
+
+      <div className="flex justify-center gap-3 text-xs text-stone-400">
+        <Link href="/support" className="underline">
+          {t("footer.support")}
+        </Link>
+        <Link href="/privacy" className="underline">
+          {t("footer.privacy")}
+        </Link>
+        <Link href="/terms" className="underline">
+          {t("footer.terms")}
+        </Link>
+      </div>
 
       <div className="mt-6 flex justify-center">
         <Image src="/illustrations/random-deco.png" alt="" width={160} height={160} />

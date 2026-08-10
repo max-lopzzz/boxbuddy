@@ -34,6 +34,10 @@ const content: Record<Locale, { title: string; lastUpdated: string; sections: Se
         body: "BoxBuddy uses two cookies: one to keep you signed in (managed by Supabase Auth), and one to remember your chosen language (English or Spanish). Neither is used for advertising or tracking.",
       },
       {
+        heading: "Camera Access",
+        body: "BoxBuddy's barcode scanner uses your device's camera to read barcodes. Camera frames are processed entirely on your device and are never transmitted to or stored on our servers.",
+      },
+      {
         heading: "Your Rights",
         body: "You may request access to, correction of, or deletion of your personal data at any time by emailing m.lopz.montn@gmail.com.",
       },
@@ -78,6 +82,10 @@ const content: Record<Locale, { title: string; lastUpdated: string; sections: Se
       {
         heading: "Cookies",
         body: "BoxBuddy usa dos cookies: una para mantener tu sesión iniciada (gestionada por Supabase Auth) y otra para recordar el idioma que elegiste (inglés o español). Ninguna se usa para publicidad ni rastreo.",
+      },
+      {
+        heading: "Acceso a la cámara",
+        body: "El escáner de códigos de barras de BoxBuddy usa la cámara de tu dispositivo para leer códigos de barras. Los fotogramas de la cámara se procesan completamente en tu dispositivo y nunca se transmiten ni se almacenan en nuestros servidores.",
       },
       {
         heading: "Tus derechos",

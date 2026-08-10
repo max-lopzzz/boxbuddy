@@ -15,7 +15,7 @@ const content: Record<Locale, { title: string; lastUpdated: string; sections: Se
       },
       {
         heading: "Your Account",
-        body: "You are responsible for maintaining the confidentiality of your account credentials and for all activity that occurs under your account. You must provide accurate information when creating your account.",
+        body: "You are responsible for maintaining the confidentiality of your account credentials and for all activity that occurs under your account. You must provide accurate information when creating your account. You must be at least 18 years old, or the age of majority in your jurisdiction, to use BoxBuddy.",
       },
       {
         heading: "Subscriptions and Billing",
@@ -61,7 +61,7 @@ const content: Record<Locale, { title: string; lastUpdated: string; sections: Se
       },
       {
         heading: "Tu cuenta",
-        body: "Eres responsable de mantener la confidencialidad de tus credenciales de cuenta y de toda actividad que ocurra bajo tu cuenta. Debes proporcionar información precisa al crear tu cuenta.",
+        body: "Eres responsable de mantener la confidencialidad de tus credenciales de cuenta y de toda actividad que ocurra bajo tu cuenta. Debes proporcionar información precisa al crear tu cuenta. Debes tener al menos 18 años, o la mayoría de edad en tu jurisdicción, para usar BoxBuddy.",
       },
       {
         heading: "Suscripciones y facturación",
