@@ -79,6 +79,17 @@ export default function SignupPage() {
           {t("signup.alreadyHaveAccount")}
         </Link>
       </form>
+      <div className="flex justify-center gap-3 text-xs text-stone-400">
+        <Link href="/support" className="underline">
+          {t("footer.support")}
+        </Link>
+        <Link href="/privacy" className="underline">
+          {t("footer.privacy")}
+        </Link>
+        <Link href="/terms" className="underline">
+          {t("footer.terms")}
+        </Link>
+      </div>
     </main>
   );
 }

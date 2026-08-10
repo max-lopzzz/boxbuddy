@@ -144,4 +144,8 @@ export const en = {
   "scan.cameraNotWorkingSummary": "Camera not working? Enter the code manually.",
   "scan.manualCodePlaceholder": "e.g. bb_x7f2a9",
   "scan.lookUp": "Look up",
+
+  "footer.support": "Support",
+  "footer.privacy": "Privacy Policy",
+  "footer.terms": "Terms of Service",
 };

@@ -148,4 +148,8 @@ export const es: Dictionary = {
   "scan.cameraNotWorkingSummary": "¿La cámara no funciona? Ingresa el código manualmente.",
   "scan.manualCodePlaceholder": "ej. bb_x7f2a9",
   "scan.lookUp": "Buscar",
+
+  "footer.support": "Soporte",
+  "footer.privacy": "Política de Privacidad",
+  "footer.terms": "Términos de Servicio",
 };
