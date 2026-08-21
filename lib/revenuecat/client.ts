@@ -18,18 +18,26 @@ function getPurchases(appUserId: string) {
   return Purchases.getSharedInstance();
 }
 
+// RevenueCat's paywall locale codes don't match BoxBuddy's own two-letter `Locale`
+// values — they're specific RevenueCat-defined codes (see
+// https://www.revenuecat.com/docs/tools/paywalls/creating-paywalls/localization),
+// and only a locale that actually has translated paywall content configured in the
+// RevenueCat dashboard (Paywall Editor → Localization) will render — anything else
+// silently falls back to the paywall's default/base content. BoxBuddy's Spanish
+// content in RevenueCat is specifically "Spanish (Mexico)", whose code is "es_MX",
+// not the generic "es". English has no explicit code here because it's the
+// paywall's default/base language, not a separately-added localization.
+const REVENUECAT_PAYWALL_LOCALE: Partial<Record<Locale, string>> = {
+  es: "es_MX",
+};
+
 // No `htmlTarget` is passed: per RevenueCat's Web SDK, presentPaywall() creates its
 // own full-screen overlay when no target element is given — the modern, documented
 // approach that needs no custom paywall UI on BoxBuddy's side.
-//
-// `selectedLocale` tells RevenueCat's hosted paywall/checkout which language to render,
-// matching BoxBuddy's own language toggle instead of silently following the browser's
-// locale. It only takes effect for locales that actually have translated paywall content
-// configured in the RevenueCat dashboard (Paywall Editor → Localization) — passing "es"
-// here falls back to English if no Spanish paywall content exists there yet.
 export async function presentPaywall(
   appUserId: string,
   locale: Locale
 ): Promise<PaywallPurchaseResult> {
-  return getPurchases(appUserId).presentPaywall({ selectedLocale: locale });
+  const selectedLocale = REVENUECAT_PAYWALL_LOCALE[locale];
+  return getPurchases(appUserId).presentPaywall(selectedLocale ? { selectedLocale } : {});
 }
