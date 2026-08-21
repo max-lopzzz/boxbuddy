@@ -16,12 +16,12 @@ export function UpgradeButton({
   className?: string;
 }) {
   const [error, setError] = useState(false);
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
 
   async function handleClick() {
     setError(false);
     try {
-      await presentPaywall(appUserId);
+      await presentPaywall(appUserId, locale);
       onSuccess();
     } catch (err) {
       if (err instanceof PurchasesError && err.errorCode === ErrorCode.UserCancelledError) {
