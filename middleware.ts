@@ -32,11 +32,22 @@ export async function middleware(request: NextRequest) {
         );
       },
     },
+    global: {
+      // Vercel kills routing middleware after 25s. Without this, a slow/unresponsive
+      // Supabase auth endpoint hangs the getUser() call below until that hard limit,
+      // producing a MIDDLEWARE_INVOCATION_TIMEOUT 504 for every request.
+      fetch: (input, init) => fetch(input, { ...init, signal: AbortSignal.timeout(5000) }),
+    },
   });
 
   // Refreshes the session (rewriting cookies if the access token was renewed) so
-  // Server Components downstream always see a current session.
-  await supabase.auth.getUser();
+  // Server Components downstream always see a current session. Fail soft: if Supabase
+  // is unreachable or slow, continue unauthenticated rather than hanging the request.
+  try {
+    await supabase.auth.getUser();
+  } catch (error) {
+    console.error("middleware: supabase.auth.getUser() failed", error);
+  }
 
   // Auto-detect the visitor's language on their first visit only — once the cookie
   // exists (from detection or an explicit choice in Settings), never overwrite it here.
