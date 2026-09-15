@@ -75,11 +75,11 @@ describe("parseSubscriberResponse", () => {
     expect(result.canPrintLabels).toBe(false);
   });
 
-  it("falls back to free for an unrecognized product_identifier", () => {
+  it("treats an active entitlement with an unrecognized product_identifier as lifetime (e.g. a RevenueCat dashboard promotional grant like 'rc_promo_boxbuddy_pro_lifetime')", () => {
     const result = parseSubscriberResponse(
-      subscriberJson({ expires_date: null, product_identifier: "some_other_product" })
+      subscriberJson({ expires_date: null, product_identifier: "rc_promo_boxbuddy_pro_lifetime" })
     );
-    expect(result.tier).toBe("free");
+    expect(result.tier).toBe("lifetime");
   });
 
   it("still surfaces managementURL on an otherwise-free result", () => {

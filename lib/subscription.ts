@@ -58,8 +58,14 @@ export function parseSubscriberResponse(json: unknown): SubscriptionStatus {
     return { ...FREE_TIER_STATUS, managementURL };
   }
 
+  // A manual/promotional grant from the RevenueCat dashboard (used e.g. for support
+  // comps or dev testing) reaches this entitlement with a synthetic identifier like
+  // "rc_promo_boxbuddy_pro_lifetime", not one of the real store product ids above.
+  // The entitlement is still active and unexpired at this point, so treat any
+  // unrecognized-but-active product as full (lifetime-equivalent) access instead of
+  // silently downgrading a granted user to the free tier.
   const productIdentifier = e.product_identifier;
-  const tier: SubscriptionTier = isKnownProduct(productIdentifier) ? productIdentifier : "free";
+  const tier: SubscriptionTier = isKnownProduct(productIdentifier) ? productIdentifier : "lifetime";
   const rules = TIER_RULES[tier];
   return { tier, itemLimit: rules.itemLimit, canPrintLabels: rules.canPrintLabels, managementURL };
 }
