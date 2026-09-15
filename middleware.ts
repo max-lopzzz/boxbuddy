@@ -43,8 +43,19 @@ export async function middleware(request: NextRequest) {
   // Refreshes the session (rewriting cookies if the access token was renewed) so
   // Server Components downstream always see a current session. Fail soft: if Supabase
   // is unreachable or slow, continue unauthenticated rather than hanging the request.
+  //
+  // The per-request fetch timeout above isn't enough on its own: auth-js can retry
+  // a failed token refresh internally with backoff for up to ~30s (longer than
+  // Vercel's 25s middleware limit), and some runtimes don't cleanly abort a fetch
+  // stuck in DNS resolution. This outer race is the hard backstop regardless of
+  // what's hanging underneath.
   try {
-    await supabase.auth.getUser();
+    await Promise.race([
+      supabase.auth.getUser(),
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("supabase.auth.getUser() exceeded 8s")), 8000)
+      ),
+    ]);
   } catch (error) {
     console.error("middleware: supabase.auth.getUser() failed", error);
   }
